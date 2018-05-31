@@ -17,9 +17,6 @@ public class GeneticAlgorithmController {
     
     private static GeneticAlgorithmController instance;
 
-    int SIZE = 5;
-    int MAX_GENS = 5;
-    
     private Population currentPopulation;
     private final GeneticAlgorithmModel model;
 
@@ -31,7 +28,7 @@ public class GeneticAlgorithmController {
         if (instance == null) {
             instance = new GeneticAlgorithmController();
             instance.startUp();
-        }        
+        }
         return instance;
     }
 
@@ -58,7 +55,6 @@ public class GeneticAlgorithmController {
         model.sendMessage("start");
         simulateGeneration().thenAccept((res) -> {
             if (isDone()) {
-                model.sendMessage("finish");
                 return;
             }
             model.sendMessage("Generation " + model.getCurrentGeneration() + " " + (System.currentTimeMillis() - l) + "ms");
@@ -78,7 +74,7 @@ public class GeneticAlgorithmController {
 
     public void generateStartPopulation() {
         currentPopulation = new Population();
-        for (int i = 0; i < SIZE; i++) {
+        for (int i = 0; i < model.getPopulationSize(); i++) {
             currentPopulation.add(ChromossomeFactory.random());
         }
     }
@@ -93,7 +89,7 @@ public class GeneticAlgorithmController {
         double i = 0;
         for (Chromossome chromossome : currentPopulation.getChromossomes()) {
             
-            int pct = (int) ((i / SIZE) * 100);
+            int pct = (int) ((i / model.getPopulationSize()) * 100);
             if (pct != oldPct) {
                 if (pct % 5 == 0) {
                     System.out.print(pct);
@@ -129,7 +125,7 @@ public class GeneticAlgorithmController {
     }
     
     public boolean isDone() {
-        return model.getCurrentGeneration() >= MAX_GENS;
+        return model.getCurrentGeneration() >= model.getMaxGenerations();
     }
 
     public void createNextGeneration() {
@@ -168,7 +164,7 @@ public class GeneticAlgorithmController {
         Chromossome best = newPopulation.remove(newPopulation.size() - 1);
         
         // Kills 80% of the population
-        for (int i = 0; i < SIZE * 0.7; i++) {
+        for (int i = 0; i < model.getPopulationSize() * 0.7; i++) {
             for (int j = 0; j < newPopulation.size(); j++) {
                 if (Math.random() > 0.5) {
                     newPopulation.remove(j);
@@ -189,7 +185,7 @@ public class GeneticAlgorithmController {
             }
         }        
         
-        for (int i = newPopulation.size(); i < SIZE; i++) {
+        for (int i = newPopulation.size(); i < model.getPopulationSize(); i++) {
             Chromossome parent1 = parentPool.get((int) (Math.random() * parentPool.size()));
             Chromossome parent2 = parentPool.get((int) (Math.random() * parentPool.size()));
             Chromossome child = ChromossomeFactory.uniformCrossover(parent1, parent2);

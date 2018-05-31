@@ -16,10 +16,14 @@ import java.util.concurrent.Executors;
 public class GeneticAlgorithmModel {
 
     private final List<MessageProcessor> messageProcessors;
+    private int maxGenerations;
+    private int populationSize;
     private int currentGeneration;
 
     public GeneticAlgorithmModel() {
         this.messageProcessors = new ArrayList<>();
+        this.maxGenerations = 5;
+        this.populationSize = 5;
     }
 
     public void initialize() {
@@ -56,4 +60,21 @@ public class GeneticAlgorithmModel {
         setCurrentGeneration(getCurrentGeneration() + 1);
     }
 
+    public void setMaxGenerations(int maxGenerations) {
+        this.maxGenerations = maxGenerations;
+        sendModelUpdate("maxGenerations", maxGenerations);
+    }
+
+    public int getMaxGenerations() {
+        return this.maxGenerations;
+    }
+
+    public void setPopulationSize(int populationSize) {
+        this.populationSize = populationSize;
+        sendModelUpdate("populationSize", populationSize);
+    }
+
+    public int getPopulationSize() {
+        return this.populationSize;
+    }
 }
