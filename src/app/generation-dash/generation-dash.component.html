@@ -1,0 +1,12 @@
+<h1>Geração {{number}}</h1>
+
+<div class="row spaced">
+  <div class="col-md-3" *ngFor="let individual of generation.individuals">
+    <div class="card">
+      <div class="card-body">
+        <h1 class="card-title">{{individual.average | percent}}</h1>
+        <h6 class="card-subtitle mb-2 text-muted">%</h6>
+      </div>
+    </div>
+  </div>
+</div>

@@ -15,7 +15,3 @@ header {
     margin-right: calc(50% - 20px);
     margin-top: calc(50vh - 20px);
 }
-
-.row.spaced {
-    margin-bottom: 15px;
-}

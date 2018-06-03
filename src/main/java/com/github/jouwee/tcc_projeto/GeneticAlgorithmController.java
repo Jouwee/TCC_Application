@@ -51,14 +51,11 @@ public class GeneticAlgorithmController {
     
     public void runGenerations() {
         l = System.currentTimeMillis();
-        model.sendMessage("start");
         simulateGeneration().thenAccept((res) -> {
             model.addGenerationResults(res);
             if (isDone()) {
                 return;
             }
-            model.sendMessage("Generation " + model.getCurrentGeneration() + " " + (System.currentTimeMillis() - l) + "ms");
-            model.sendMessage(res.toString());
             pool.submit(() -> loop());
         });
     }
@@ -105,18 +102,10 @@ public class GeneticAlgorithmController {
                 future1.join();
             }
             double sum = 0;
-            IndividualResult best = null;
-            IndividualResult worst = null;
             for (IndividualResult result : results) {
                 sum += result.getAverage();
-                if (best == null || best.getAverage() < result.getAverage()) {
-                    best = result;
-                }
-                if (worst == null || worst.getAverage() > result.getAverage()) {
-                    worst = result;
-                }
             }
-            future.complete(new GenerationResult(model.getCurrentGeneration(), sum / currentPopulation.size(), best, worst));
+            future.complete(new GenerationResult(model.getCurrentGeneration(), sum / currentPopulation.size(), results));
         });
         return future;
     }
