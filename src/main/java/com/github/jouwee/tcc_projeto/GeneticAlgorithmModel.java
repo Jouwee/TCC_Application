@@ -1,37 +1,39 @@
 package com.github.jouwee.tcc_projeto;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import com.google.gson.GsonBuilder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import visnode.application.NodeNetwork;
-import visnode.application.parser.NodeNetworkParser;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.Map;
 
 public class GeneticAlgorithmModel {
 
-    private final List<MessageProcessor> messageProcessors;
+    private transient final List<MessageProcessor> messageProcessors;
     private int maxGenerations;
     private int populationSize;
     private int currentGeneration;
+    private double currentGenerationProgress;
+    private final List<GenerationResult> generationResults;
 
     public GeneticAlgorithmModel() {
         this.messageProcessors = new ArrayList<>();
-        this.maxGenerations = 5;
-        this.populationSize = 5;
+        this.maxGenerations = 300;
+        this.populationSize = 300;
+        this.generationResults = new ArrayList<>();
     }
 
     public void initialize() {
         setCurrentGeneration(0);
+        setCurrentGenerationProgress(0);
+        clearGenerationResults();
     }
 
     public synchronized void onMessage(MessageProcessor listener) {
         this.messageProcessors.add(listener);
+    }
+
+    public synchronized void sendMessage(Message message) {
+        sendMessage(new GsonBuilder().create().toJson(message));
     }
 
     public synchronized void sendMessage(String message) {
@@ -41,10 +43,9 @@ public class GeneticAlgorithmModel {
     }
 
     public void sendModelUpdate(String name, Object value) {
-        if (!((value instanceof Number) || (value instanceof Boolean))) {
-            value = "\"" + value.toString() + "\"";
-        }
-        sendMessage("{\"message\":\"updateModel\", \"payload\":{\""+name+"\": "+value+"}}");
+        Map message = new HashMap();
+        message.put(name, value);
+        sendMessage(new Message("updateModel", message));
     }
 
     public int getCurrentGeneration() {
@@ -76,5 +77,24 @@ public class GeneticAlgorithmModel {
 
     public int getPopulationSize() {
         return this.populationSize;
+    }
+
+    public double getCurrentGenerationProgress() {
+        return currentGenerationProgress;
+    }
+
+    public void setCurrentGenerationProgress(double currentGenerationProgress) {
+        this.currentGenerationProgress = currentGenerationProgress;
+        sendModelUpdate("currentGenerationProgress", currentGenerationProgress);
+    }
+
+    public void addGenerationResults(GenerationResult res) {
+        generationResults.add(0, res);
+        sendModelUpdate("generationResults", generationResults);
+    }
+    
+    private void clearGenerationResults() {
+        generationResults.clear();
+        sendModelUpdate("generationResults", generationResults);
     }
 }

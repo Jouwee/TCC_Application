@@ -1,0 +1,21 @@
+header {
+    background: #007bff;
+}
+
+#connecting {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+
+}
+
+#connecting .center {
+    position: relative;
+    margin-left: calc(50% - 20px);
+    margin-right: calc(50% - 20px);
+    margin-top: calc(50vh - 20px);
+}
+
+.row.spaced {
+    margin-bottom: 15px;
+}

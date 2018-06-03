@@ -28,14 +28,14 @@ public class IndividualEvaluator {
     static {
         try {
             inputImage = new Image[] {
-                /*ImageFactory.buildRGBImage(ImageIO.read(ImageComparer.class.getResource("/Test_RGB/26.bmp"))),
+                ImageFactory.buildRGBImage(ImageIO.read(ImageComparer.class.getResource("/Test_RGB/26.bmp"))),
                 ImageFactory.buildRGBImage(ImageIO.read(ImageComparer.class.getResource("/Test_RGB/45.bmp"))),
-                ImageFactory.buildRGBImage(ImageIO.read(ImageComparer.class.getResource("/Test_RGB/49.bmp"))),*/
+                ImageFactory.buildRGBImage(ImageIO.read(ImageComparer.class.getResource("/Test_RGB/49.bmp"))),
             };
             expected = new Image[] {
-                /*ImageFactory.buildRGBImage(ImageIO.read(ImageComparer.class.getResource("/Test_Labels/26.bmp"))),
+                ImageFactory.buildRGBImage(ImageIO.read(ImageComparer.class.getResource("/Test_Labels/26.bmp"))),
                 ImageFactory.buildRGBImage(ImageIO.read(ImageComparer.class.getResource("/Test_Labels/45.bmp"))),
-                ImageFactory.buildRGBImage(ImageIO.read(ImageComparer.class.getResource("/Test_Labels/49.bmp"))),*/
+                ImageFactory.buildRGBImage(ImageIO.read(ImageComparer.class.getResource("/Test_Labels/49.bmp"))),
             };
         } catch(Exception e) {
             e.printStackTrace();
@@ -56,13 +56,8 @@ public class IndividualEvaluator {
                 });
             }
             CompletableFuture<IndividualResult> averageResult = new CompletableFuture<>();
-            try {
-                Thread.sleep(300);
-            } catch (Exception e) {
-                
-            }
             CompletableFuture.allOf(results).thenAccept((v) -> {
-                averageResult.complete(new IndividualResult(Math.random()));
+                averageResult.complete(new IndividualResult(sum.get() / inputImage.length));
             });
             return averageResult;
         } catch (Exception e) {

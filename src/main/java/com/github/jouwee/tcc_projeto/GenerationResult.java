@@ -11,17 +11,25 @@ package com.github.jouwee.tcc_projeto;
  */
 public class GenerationResult {
     
-    private double average;
-    private IndividualResult best;
+    private final int number;
+    private final double average;
+    private final IndividualResult best;
+    private final IndividualResult worst;
 
-    public GenerationResult(double average, IndividualResult best) {
+    public GenerationResult(int number, double average, IndividualResult best, IndividualResult worst) {
+        this.number = number;
         this.average = average;
         this.best = best;
+        this.worst = worst;
     }
 
     public double getAverage() {
         return average;
     }
+
+    public int getNumber() {
+        return number;
+    }    
 
     @Override
     public String toString() {

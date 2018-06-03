@@ -20,12 +20,13 @@ public class Teste {
             GeneticAlgorithmController.get().onMessage((msg) -> {
                 try {
                     s.getBasicRemote().sendText(msg);
-                } catch (IOException ex) {
+                } catch (IOException | IllegalStateException ex) {
                     //. . .
                 }
             });
             GeneticAlgorithmController.get().sendWelcomeMessage();
         } catch (Throwable t) {
+            t.printStackTrace();
         }
     }
 
@@ -35,7 +36,11 @@ public class Teste {
             GeneticAlgorithmController.get().startUp();
             return "{\"message\": \"ok\"}";
         }
-        return "{\"message\": \"unknown\"}";
+        if (mensagem.equals("{\"message\":\"currentStatus\"}")) {
+            GeneticAlgorithmController.get().sendWelcomeMessage();
+            return "{\"message\": \"ok\"}";
+        }
+        return "{\"message\": \"unknown command: " + mensagem + "\"}";
     }
 
 }

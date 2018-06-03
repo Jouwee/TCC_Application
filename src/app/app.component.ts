@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable, Observer } from 'rxjs';
 
-const SERVER_URL = 'ws://localhost:8080/ws/teste';
+const SERVER_URL = 'ws://localhost:8180/TCC_Projeto/teste';
 
 @Component({
   selector: 'app-root',
@@ -12,10 +12,12 @@ export class AppComponent implements OnInit {
   title = 'app';
   model = {};
   socket;
+  connectionStatus:string = "connecting";
 
   ngOnInit() {
     this.socket = new WebSocket(SERVER_URL);
     this.socket.onmessage = (event) => {
+      this.connectionStatus = "upToDate";
       try {
         let data = JSON.parse(event.data);      
         if (data.message == "updateModel") {
@@ -31,7 +33,7 @@ export class AppComponent implements OnInit {
     }
 
     this.socket.onopen = (event) => {
-      this.socket.send("Wat");
+      this.connectionStatus = "connected";
     }  
   }
 

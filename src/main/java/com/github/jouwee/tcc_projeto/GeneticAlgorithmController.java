@@ -27,7 +27,6 @@ public class GeneticAlgorithmController {
     public synchronized static GeneticAlgorithmController get() {
         if (instance == null) {
             instance = new GeneticAlgorithmController();
-            instance.startUp();
         }
         return instance;
     }
@@ -54,6 +53,7 @@ public class GeneticAlgorithmController {
         l = System.currentTimeMillis();
         model.sendMessage("start");
         simulateGeneration().thenAccept((res) -> {
+            model.addGenerationResults(res);
             if (isDone()) {
                 return;
             }
@@ -69,7 +69,8 @@ public class GeneticAlgorithmController {
     }
 
     public void sendWelcomeMessage() {
-        model.sendMessage("welcome");
+        model.sendMessage(new Message("updateModel", model));
+        
     }
 
     public void generateStartPopulation() {
@@ -83,22 +84,15 @@ public class GeneticAlgorithmController {
         CompletableFuture<GenerationResult> future = new CompletableFuture<>();
         List<CompletableFuture> futures = new ArrayList<>();
         List<IndividualResult> results = new ArrayList<>();
-        System.out.println("Simulating individuals...");
-        System.out.print("%");
-        int oldPct = 0;
+        double oldPct = 0;
         double i = 0;
         for (Chromossome chromossome : currentPopulation.getChromossomes()) {
-            
-            int pct = (int) ((i / model.getPopulationSize()) * 100);
+            i++;
+            double pct = (i / model.getPopulationSize());
             if (pct != oldPct) {
-                if (pct % 5 == 0) {
-                    System.out.print(pct);
-                } else {
-                    System.out.print(".");
-                }
+                model.setCurrentGenerationProgress(pct);
                 oldPct = pct;
             }
-            i++;
             CompletableFuture<IndividualResult> cFuture = new IndividualEvaluator().evaluate(chromossome);
             futures.add(cFuture);
             cFuture.thenAccept((r) -> {
@@ -106,20 +100,23 @@ public class GeneticAlgorithmController {
                 results.add(r);
             }).join();
         }
-        System.out.println("");
         CompletableFuture.runAsync(() -> {
             for (CompletableFuture future1 : futures) {
                 future1.join();
             }
             double sum = 0;
             IndividualResult best = null;
+            IndividualResult worst = null;
             for (IndividualResult result : results) {
                 sum += result.getAverage();
                 if (best == null || best.getAverage() < result.getAverage()) {
                     best = result;
                 }
+                if (worst == null || worst.getAverage() > result.getAverage()) {
+                    worst = result;
+                }
             }
-            future.complete(new GenerationResult(sum / currentPopulation.size(), best));
+            future.complete(new GenerationResult(model.getCurrentGeneration(), sum / currentPopulation.size(), best, worst));
         });
         return future;
     }
