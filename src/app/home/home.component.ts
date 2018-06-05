@@ -13,4 +13,12 @@ export class HomeComponent implements OnInit {
   ngOnInit() {
   }
 
+  runSingle() {
+    this.model.send({message: "runSingle"});
+  }
+
+  runAsLongAsPossible() {
+    this.model.send({message: "runAsLongAsPossible"});
+  }
+
 }

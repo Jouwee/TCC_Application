@@ -41,12 +41,18 @@ public class Teste {
     @OnMessage
     public String recebeMensagem(String mensagem) {
         Message message = JsonHelper.get().fromJson(mensagem, Message.class);
-        if (message.getMessage().equals("start")) {
+        if (message.getMessage().equals("runSingle")) {
             Executors.newSingleThreadExecutor().submit(() -> {
-                GeneticAlgorithmController.get().startUp();
+                GeneticAlgorithmController.get().runGeneration();
             });
             return "{\"message\": \"ok\"}";
         }
+//        if (message.getMessage().equals("runAsLongAsPossible")) {
+//            Executors.newSingleThreadExecutor().submit(() -> {
+//                GeneticAlgorithmController.get().startUp();
+//            });
+//            return "{\"message\": \"ok\"}";
+//        }
         if (message.getMessage().equals("currentStatus")) {
             Executors.newSingleThreadExecutor().submit(() -> {
                 GeneticAlgorithmController.get().sendWelcomeMessage();
@@ -54,7 +60,9 @@ public class Teste {
             return "{\"message\": \"ok\"}";
         }
         if (message.getMessage().equals("openChromossome")) {
-            open(ChromossomeFactory.fromMessage((ArrayList) message.getPayload()));
+            Executors.newSingleThreadExecutor().submit(() -> {
+                open(ChromossomeFactory.fromMessage((ArrayList) message.getPayload()));
+            });
             return "{\"message\": \"ok\"}";
         }
         return "{\"message\": \"unknown command: " + mensagem + "\"}";

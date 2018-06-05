@@ -32,10 +32,6 @@ export class ModelService {
     }  
   }
 
-  start() {
-    this.send({message: "start"});
-  }
-
   send(message) {
     this.socket.send(JSON.stringify(message));
   }

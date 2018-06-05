@@ -2,7 +2,7 @@
   <div class="col-md-3">
     <div class="card">
       <div class="card-body">
-        <h1 class="card-title">{{model.currentGeneration}}</h1>
+        <h1 class="card-title">{{model.currentGeneration == 0 ? '-' : model.currentGeneration}}</h1>
         <h6 class="card-subtitle mb-2 text-muted">Current gen.</h6>
         <div class="progress" style="height: 2px;">
           <div class="progress-bar" role="progressbar" [style.width.%]="model.currentGenerationProgress * 100" aria-valuenow="25" aria-valuemin="0"
@@ -14,8 +14,8 @@
   <div class="col-md-3">
     <div class="card">
       <div class="card-body">
-          <button type="button" class="btn btn-primary btn-block" (click)="model.start()">Play</button>
-          <button type="button" class="btn btn-primary btn-block">Stop</button>
+          <button type="button" class="btn btn-primary btn-block" (click)="runSingle()" [disabled]="model.state != 'idle'">Run single</button>
+          <button type="button" class="btn btn-primary btn-block" (click)="runAsLongAsPossible()" [disabled]="model.state != 'idle'">Run ALAP</button>
       </div>
     </div>
   </div>

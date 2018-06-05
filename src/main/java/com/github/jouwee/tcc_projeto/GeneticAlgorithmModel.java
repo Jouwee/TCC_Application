@@ -12,19 +12,22 @@ public class GeneticAlgorithmModel {
     private int populationSize;
     private int currentGeneration;
     private double currentGenerationProgress;
+    private String state;
     private final List<GenerationResult> generationResults;
 
     public GeneticAlgorithmModel() {
         this.messageProcessors = new ArrayList<>();
         this.maxGenerations = 10;
-        this.populationSize = 15;
+        this.populationSize = 5;
         this.generationResults = new ArrayList<>();
+        this.state = "idle";
     }
 
     public void initialize() {
         setCurrentGeneration(0);
         setCurrentGenerationProgress(0);
         clearGenerationResults();
+        state = "idle";
     }
 
     public synchronized void onMessage(MessageProcessor listener) {
@@ -96,4 +99,14 @@ public class GeneticAlgorithmModel {
         generationResults.clear();
         sendModelUpdate("generationResults", generationResults);
     }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+        sendModelUpdate("state", state);
+    }
+    
 }

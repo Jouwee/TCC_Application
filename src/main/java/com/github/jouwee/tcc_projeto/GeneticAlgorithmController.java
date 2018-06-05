@@ -49,6 +49,26 @@ public class GeneticAlgorithmController {
     private ExecutorService pool = Executors.newSingleThreadExecutor();
     long l;
     
+    /**
+     * Runs a single generation
+     */
+    public void runGeneration() {
+        if (model.getCurrentGeneration() == 0) {
+            model.initialize();
+            generateStartPopulation();
+        } else {
+            createNextGeneration();
+        }
+        try {
+            simulateGeneration().thenAccept((res) -> {
+                model.addGenerationResults(res);
+            });
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    
     public void runGenerations() {
         l = System.currentTimeMillis();
         simulateGeneration().thenAccept((res) -> {
@@ -77,6 +97,8 @@ public class GeneticAlgorithmController {
     }
 
     public CompletableFuture<GenerationResult> simulateGeneration() {
+        model.setState("simulating");
+        model.incrementCurrentGeneration();
         CompletableFuture<GenerationResult> future = new CompletableFuture<>();
         List<CompletableFuture> futures = new ArrayList<>();
         List<IndividualResult> results = new ArrayList<>();
@@ -104,6 +126,7 @@ public class GeneticAlgorithmController {
             for (IndividualResult result : results) {
                 sum += result.getAverage();
             }
+            model.setState("idle");
             future.complete(new GenerationResult(model.getCurrentGeneration(), sum / currentPopulation.size(), results));
         });
         return future;
@@ -160,8 +183,6 @@ public class GeneticAlgorithmController {
         // make sure the best survives
         newPopulation.add(best);
         
-        System.out.println("after remove " + newPopulation.size());
-        
         
         List<Chromossome> parentPool = new ArrayList<>();
         for (int i = 0; i < chromossomes.size(); i++) {
@@ -178,9 +199,6 @@ public class GeneticAlgorithmController {
             newPopulation.add(child);
         }
         currentPopulation = newPopulation;
-        System.out.println("final size " + currentPopulation.size());
-
-        model.incrementCurrentGeneration();
     }
-    
+
 }
