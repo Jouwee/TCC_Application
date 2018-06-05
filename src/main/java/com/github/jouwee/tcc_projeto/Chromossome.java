@@ -1,23 +1,17 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.github.jouwee.tcc_projeto;
 
-import org.paim.commons.Image;
-
 /**
- *
- * @author Pichau
+ * Chromossome
  */
 public class Chromossome {
     
-    private Gene[] genes;
-    private IndividualResult result;
+    /** Genes */
+    private final Gene[] genes;
+    /** Result */
+    private transient IndividualResult result;
 
     /**
-     * Cria um novo chromossomo com os genes informados
+     * Creates a new chromossome
      * 
      * @param genes 
      */
@@ -25,10 +19,20 @@ public class Chromossome {
         this.genes = genes;
     }
 
+    /**
+     * Return the genes
+     * 
+     * @return Gene[]
+     */
     public Gene[] getGenes() {
         return genes;
     }
 
+    /**
+     * Returns the chromossome result
+     * 
+     * @return IndividualResult
+     */
     public IndividualResult getResult() {
         return result;
     }

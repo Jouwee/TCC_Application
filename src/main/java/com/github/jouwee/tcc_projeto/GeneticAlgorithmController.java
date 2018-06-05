@@ -67,7 +67,6 @@ public class GeneticAlgorithmController {
 
     public void sendWelcomeMessage() {
         model.sendMessage(new Message("updateModel", model));
-        
     }
 
     public void generateStartPopulation() {

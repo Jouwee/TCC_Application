@@ -1,6 +1,5 @@
 package com.github.jouwee.tcc_projeto;
 
-import com.google.gson.GsonBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +32,7 @@ public class GeneticAlgorithmModel {
     }
 
     public synchronized void sendMessage(Message message) {
-        sendMessage(new GsonBuilder().create().toJson(message));
+        sendMessage(JsonHelper.get().toJson(message));
     }
 
     public synchronized void sendMessage(String message) {

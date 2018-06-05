@@ -23,6 +23,11 @@ export class GenerationDashComponent implements OnInit, OnDestroy {
     });
   }
 
+  open(chromossome) {
+    console.log("que");
+    this.model.send({message: "openChromossome", payload: chromossome});
+  }
+
   ngOnDestroy() {
     this.sub.unsubscribe();
   }

@@ -57,7 +57,7 @@ public class IndividualEvaluator {
             }
             CompletableFuture<IndividualResult> averageResult = new CompletableFuture<>();
             CompletableFuture.allOf(results).thenAccept((v) -> {
-                averageResult.complete(new IndividualResult(sum.get() / inputImage.length));
+                averageResult.complete(new IndividualResult(chromossome, sum.get() / inputImage.length));
             });
             return averageResult;
         } catch (Exception e) {

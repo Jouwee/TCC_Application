@@ -5,6 +5,10 @@
  */
 package com.github.jouwee.tcc_projeto;
 
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import visnode.pdi.process.AverageBlurProcess;
 import visnode.pdi.process.BrightnessProcess;
 import visnode.pdi.process.CannyProcess;
@@ -16,8 +20,6 @@ import visnode.pdi.process.GaussianBlurProcess;
 import visnode.pdi.process.GrayscaleProcess;
 import visnode.pdi.process.HoltProcess;
 import visnode.pdi.process.InvertColorProcess;
-import visnode.pdi.process.KirshProcess;
-import visnode.pdi.process.LaplaceProcess;
 import visnode.pdi.process.MedianBlurProcess;
 import visnode.pdi.process.OpeningProcess;
 // import visnode.pdi.process.PointInPolygonFillProcess;
@@ -83,6 +85,31 @@ public class ChromossomeFactory {
             genes[i++] = new NumericGene(Math.random());
         }
         return new Chromossome(genes);
+    }
+    
+    /**
+     * Returns a chromossome from a message
+     * 
+     * @param list
+     * @return Chromossome
+     */
+    public static Chromossome fromMessage(ArrayList<Object> list) {
+        return new Chromossome(list.stream()
+                .map((object) -> geneFromObject(object))
+                .collect(Collectors.toList()).toArray(new Gene[] {}));
+    }
+    
+    private static Gene geneFromObject(Object object) {
+        try {
+            return new NumericGene(Double.parseDouble(object.toString()));
+        } catch (NumberFormatException e) {
+            try {
+                return new ProcessTypeGene(Class.forName(object.toString()));
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(ChromossomeFactory.class.getName()).log(Level.SEVERE, null, ex);
+                return null;
+            }
+        }
     }
 
     static Chromossome uniformCrossover(Chromossome parent1, Chromossome parent2) {
