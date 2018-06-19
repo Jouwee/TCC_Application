@@ -29,12 +29,12 @@ public class IndividualEvaluator {
         try {
             inputImage = new Image[] {
                 ImageFactory.buildRGBImage(ImageIO.read(ImageComparer.class.getResource("/Test_RGB/26.bmp"))),
-                ImageFactory.buildRGBImage(ImageIO.read(ImageComparer.class.getResource("/Test_RGB/45.bmp"))),
+//                ImageFactory.buildRGBImage(ImageIO.read(ImageComparer.class.getResource("/Test_RGB/45.bmp"))),
                 ImageFactory.buildRGBImage(ImageIO.read(ImageComparer.class.getResource("/Test_RGB/49.bmp"))),
             };
             expected = new Image[] {
                 ImageFactory.buildRGBImage(ImageIO.read(ImageComparer.class.getResource("/Test_Labels/26.bmp"))),
-                ImageFactory.buildRGBImage(ImageIO.read(ImageComparer.class.getResource("/Test_Labels/45.bmp"))),
+//                ImageFactory.buildRGBImage(ImageIO.read(ImageComparer.class.getResource("/Test_Labels/45.bmp"))),
                 ImageFactory.buildRGBImage(ImageIO.read(ImageComparer.class.getResource("/Test_Labels/49.bmp"))),
             };
         } catch(Exception e) {

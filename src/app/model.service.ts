@@ -10,6 +10,7 @@ export class ModelService {
   model = {};
   socket;
   connectionStatus:string = "connecting";
+  listeners: Array<any> = [];
 
   constructor() {
     this.socket = new WebSocket(SERVER_URL);
@@ -20,6 +21,9 @@ export class ModelService {
         if (data.message == "updateModel") {
           for (let key in data.payload) {
             this[key] = data.payload[key];
+            for (let l of this.listeners) {
+              l(key, data.payload[key]);
+            }
           }
         }
       } catch (e) {
@@ -30,6 +34,10 @@ export class ModelService {
     this.socket.onopen = (event) => {
       this.connectionStatus = "connected";
     }  
+  }
+
+  addModelListener(listener) {
+    this.listeners.push(listener);
   }
 
   send(message) {

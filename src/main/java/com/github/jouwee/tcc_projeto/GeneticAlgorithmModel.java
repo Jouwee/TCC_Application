@@ -18,7 +18,7 @@ public class GeneticAlgorithmModel {
     public GeneticAlgorithmModel() {
         this.messageProcessors = new ArrayList<>();
         this.maxGenerations = 10;
-        this.populationSize = 5;
+        this.populationSize = 10;
         this.generationResults = new ArrayList<>();
         this.state = "idle";
     }
