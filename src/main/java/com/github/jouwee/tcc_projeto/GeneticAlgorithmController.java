@@ -10,15 +10,13 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import visnode.application.NodeNetwork;
 import visnode.application.parser.NodeNetworkParser;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class GeneticAlgorithmController {
     
     private static GeneticAlgorithmController instance;
-
     private Population currentPopulation;
     private final GeneticAlgorithmModel model;
+    private CompletableFuture<GenerationResult> generationFuture;
 
     public GeneticAlgorithmController() {
         this.model = new GeneticAlgorithmModel();
@@ -34,25 +32,13 @@ public class GeneticAlgorithmController {
     public void onMessage(MessageProcessor processor) {
         model.onMessage(processor);
     }
-
-    public void startUp() {
-        try {
-            model.initialize();
-            generateStartPopulation();
-            runGenerations();
-        } catch (Throwable e) {
-            e.printStackTrace();
-            model.sendMessage(e.getMessage());
-        }
-    }
-
-    private ExecutorService pool = Executors.newSingleThreadExecutor();
-    long l;
     
     /**
      * Runs a single generation
+     * 
+     * @return CompletableFuture
      */
-    public void runGeneration() {
+    public CompletableFuture<Void> runGeneration() {
         if (model.getCurrentGeneration() == 0) {
             model.initialize();
             generateStartPopulation();
@@ -60,29 +46,27 @@ public class GeneticAlgorithmController {
             createNextGeneration();
         }
         try {
-            simulateGeneration().thenAccept((res) -> {
+            return simulateGeneration().thenAccept((res) -> {
                 model.addGenerationResults(res);
             });
         } catch (Throwable e) {
-            e.printStackTrace();
+            CompletableFuture<Void> future = new CompletableFuture<>();
+            future.completeExceptionally(e);
+            return future;
         }
     }
-
     
-    public void runGenerations() {
-        l = System.currentTimeMillis();
-        simulateGeneration().thenAccept((res) -> {
-            model.addGenerationResults(res);
-            if (isDone()) {
-                return;
-            }
-            pool.submit(() -> loop());
+    /**
+     * Executa as simulações em Loop
+     */
+    public void keepRunning() {
+        runGeneration().thenAccept((v) -> {
+           keepRunning();
         });
     }
     
-    public void loop() {
-        createNextGeneration();
-        runGenerations();
+    public void interrupt() {
+        generationFuture.cancel(true);
     }
 
     public void sendWelcomeMessage() {
@@ -99,7 +83,7 @@ public class GeneticAlgorithmController {
     public CompletableFuture<GenerationResult> simulateGeneration() {
         model.setState("simulating");
         model.incrementCurrentGeneration();
-        CompletableFuture<GenerationResult> future = new CompletableFuture<>();
+        generationFuture = new CompletableFuture<>();
         List<CompletableFuture> futures = new ArrayList<>();
         List<IndividualResult> results = new ArrayList<>();
         double oldPct = 0;
@@ -119,23 +103,16 @@ public class GeneticAlgorithmController {
             }).join();
         }
         CompletableFuture.runAsync(() -> {
-            for (CompletableFuture future1 : futures) {
+            futures.forEach((future1) -> {
                 future1.join();
-            }
-            double sum = 0;
-            for (IndividualResult result : results) {
-                sum += result.getAverage();
-            }
+            });
+            double sum = results.stream().map((r) -> r.getAverage()).reduce(0d, (s, avg) -> s + avg);
             model.setState("idle");
-            future.complete(new GenerationResult(model.getCurrentGeneration(), sum / currentPopulation.size(), results));
+            generationFuture.complete(new GenerationResult(model.getCurrentGeneration(), sum / currentPopulation.size(), results));
         });
-        return future;
+        return generationFuture;
     }
     
-    public boolean isDone() {
-        return model.getCurrentGeneration() >= model.getMaxGenerations();
-    }
-
     public void createNextGeneration() {
         List<Chromossome> chromossomes = currentPopulation.getChromossomes();
         chromossomes.sort((c1, c2) -> {

@@ -14,8 +14,9 @@
     <div class="col-md-3">
         <div class="card">
             <div class="card-body">
-                <button type="button" class="btn btn-primary btn-block" (click)="runSingle()" [disabled]="model.state != 'idle'">Run single</button>
-                <button type="button" class="btn btn-primary btn-block" (click)="runAsLongAsPossible()" [disabled]="model.state != 'idle'">Run ALAP</button>
+                <button type="button" class="btn btn-primary btn-block" (click)="runSingle()" [disabled]="model.state != 'idle'">Run one</button>
+                <button type="button" class="btn btn-primary btn-block" (click)="runForever()" [disabled]="model.state != 'idle'">Run</button>
+                <button type="button" class="btn btn-primary btn-block" (click)="interrupt()" [disabled]="model.state == 'idle'">Interupt</button>
             </div>
         </div>
     </div>

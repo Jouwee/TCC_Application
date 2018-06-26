@@ -25,6 +25,7 @@ export class HomeComponent implements OnInit {
 
         this.model.addModelListener((key, value) => {
             if (key == 'generationResults') {
+                value = value.slice().reverse();
                 //
                 let series = this.averagePerGenerationChart.series;
                 let lastPoint = series.length == 0 ? 0 : series[0].data.length;
@@ -37,9 +38,9 @@ export class HomeComponent implements OnInit {
                 //
                 series = this.speciesChart.series;
                 // lastPoint = series.length == 0 ? 0 : series[0].data.length;
-                
+                /*
                 for (let i = lastPoint; i < value.length; i++) {
-                    let generation = value.reverse()[i];
+                    let generation = value[i];
                     let seriesCount = {};
                     for (let individual of generation.individuals) {
                         let species = this.species.getSpecies(individual.chromossome);
@@ -61,11 +62,10 @@ export class HomeComponent implements OnInit {
                     for (let j in series) {
                         series[j].addPoint(seriesCount[series[j].name] || 0, true, true);
                     }
-                }
+                }*/
 
 
             }
-            console.log(key, value);
         });
 
         
@@ -89,8 +89,7 @@ export class HomeComponent implements OnInit {
         }];
 
         
-        console.log((<any>this.model).generationResults);
-        for (let generation of (<any>this.model).generationResults.reverse()) {
+        for (let generation of (<any>this.model).generationResults.slice().reverse()) {
             data[0].data.push(generation.best.average * 100);
             data[1].data.push(generation.average * 100);
             data[2].data.push(generation.worst.average * 100);
@@ -151,7 +150,7 @@ export class HomeComponent implements OnInit {
     createSpeciesChart() {
 
         let seriesCount = {};
-        let generations = (<any>this.model).generationResults;
+        let generations = (<any>this.model).generationResults.slice().reverse();
         for (const i in generations) {
             let generation = generations[i];
             for (let individual of generation.individuals) {
@@ -227,8 +226,12 @@ export class HomeComponent implements OnInit {
         this.model.send({ message: "runSingle" });
     }
 
-    runAsLongAsPossible() {
-        this.model.send({ message: "runAsLongAsPossible" });
+    runForever() {
+        this.model.send({ message: "runForever" });
+    }
+
+    interrupt() {
+        this.model.send({ message: "interrupt" });
     }
 
 }

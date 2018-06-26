@@ -10,9 +10,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import javax.imageio.ImageIO;
 import org.paim.commons.Image;
-import org.paim.commons.ImageFactory;
 import visnode.application.NodeNetwork;
 
 /**
@@ -28,14 +26,14 @@ public class IndividualEvaluator {
     static {
         try {
             inputImage = new Image[] {
-                ImageFactory.buildRGBImage(ImageIO.read(ImageComparer.class.getResource("/Test_RGB/26.bmp"))),
-//                ImageFactory.buildRGBImage(ImageIO.read(ImageComparer.class.getResource("/Test_RGB/45.bmp"))),
-                ImageFactory.buildRGBImage(ImageIO.read(ImageComparer.class.getResource("/Test_RGB/49.bmp"))),
+                ImageLoader.input("26"),
+//                ImageLoader.input("45"),
+                ImageLoader.input("49")
             };
             expected = new Image[] {
-                ImageFactory.buildRGBImage(ImageIO.read(ImageComparer.class.getResource("/Test_Labels/26.bmp"))),
-//                ImageFactory.buildRGBImage(ImageIO.read(ImageComparer.class.getResource("/Test_Labels/45.bmp"))),
-                ImageFactory.buildRGBImage(ImageIO.read(ImageComparer.class.getResource("/Test_Labels/49.bmp"))),
+                ImageLoader.labeled("26"),
+//                ImageLoader.labeled("45"),
+                ImageLoader.labeled("49")
             };
         } catch(Exception e) {
             e.printStackTrace();

@@ -8,7 +8,6 @@ import java.util.Map;
 public class GeneticAlgorithmModel {
 
     private transient final List<MessageProcessor> messageProcessors;
-    private int maxGenerations;
     private int populationSize;
     private int currentGeneration;
     private double currentGenerationProgress;
@@ -17,8 +16,7 @@ public class GeneticAlgorithmModel {
 
     public GeneticAlgorithmModel() {
         this.messageProcessors = new ArrayList<>();
-        this.maxGenerations = 10;
-        this.populationSize = 10;
+        this.populationSize = 100;
         this.generationResults = new ArrayList<>();
         this.state = "idle";
     }
@@ -61,15 +59,6 @@ public class GeneticAlgorithmModel {
 
     public void incrementCurrentGeneration() {
         setCurrentGeneration(getCurrentGeneration() + 1);
-    }
-
-    public void setMaxGenerations(int maxGenerations) {
-        this.maxGenerations = maxGenerations;
-        sendModelUpdate("maxGenerations", maxGenerations);
-    }
-
-    public int getMaxGenerations() {
-        return this.maxGenerations;
     }
 
     public void setPopulationSize(int populationSize) {

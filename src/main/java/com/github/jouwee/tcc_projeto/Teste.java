@@ -8,8 +8,6 @@ package com.github.jouwee.tcc_projeto;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import javax.websocket.OnMessage;
@@ -45,27 +43,42 @@ public class Teste {
             Executors.newSingleThreadExecutor().submit(() -> {
                 GeneticAlgorithmController.get().runGeneration();
             });
-            return "{\"message\": \"ok\"}";
+            return ok();
         }
-//        if (message.getMessage().equals("runAsLongAsPossible")) {
-//            Executors.newSingleThreadExecutor().submit(() -> {
-//                GeneticAlgorithmController.get().startUp();
-//            });
-//            return "{\"message\": \"ok\"}";
-//        }
+        if (message.getMessage().equals("runForever")) {
+            Executors.newSingleThreadExecutor().submit(() -> {
+                GeneticAlgorithmController.get().keepRunning();
+            });
+            return ok();
+        }
+        if (message.getMessage().equals("interrupt")) {
+            Executors.newSingleThreadExecutor().submit(() -> {
+                GeneticAlgorithmController.get().interrupt();
+            });
+            return ok();
+        }
         if (message.getMessage().equals("currentStatus")) {
             Executors.newSingleThreadExecutor().submit(() -> {
                 GeneticAlgorithmController.get().sendWelcomeMessage();
             });
-            return "{\"message\": \"ok\"}";
+            return ok();
         }
         if (message.getMessage().equals("openChromossome")) {
             Executors.newSingleThreadExecutor().submit(() -> {
                 open(ChromossomeFactory.fromMessage((ArrayList) message.getPayload()));
             });
-            return "{\"message\": \"ok\"}";
+            return ok();
         }
         return "{\"message\": \"unknown command: " + mensagem + "\"}";
+    }
+    
+    /**
+     * Retorna a mensagem de Ok
+     * 
+     * @return ok
+     */
+    private String ok() {
+        return "{\"message\": \"ok\"}";
     }
 
     /**

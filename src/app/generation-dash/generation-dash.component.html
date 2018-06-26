@@ -1,13 +1,14 @@
-<h1>Geração {{number}}</h1>
-
+<h1>Geração {{number}} <button type="button" class="btn btn-primary" (click)="loadImages()">Load images</button></h1>
 <div class="row spaced">
-  <div class="col-md-3" *ngFor="let individual of generation.individuals">
+  <div class="col-lg-2 col-md-3" *ngFor="let individual of generation.individuals">
     <div class="card">
       <div class="card-body">
         <h1 class="card-title">{{individual.average | percent}}</h1>
         <h6 class="card-subtitle mb-2 text-muted">{{species.getSpecies(individual.chromossome)}}</h6>        
         <button type="button" class="btn btn-primary btn-block" (click)="open(individual.chromossome)">Open</button>
+        
       </div>
+      <img class="card-img-bottom" *ngIf="individual.image" [src]="individual.image">
     </div>
   </div>
 </div>

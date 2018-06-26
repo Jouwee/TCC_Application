@@ -94,12 +94,23 @@ public class ChromossomeFactory {
      * @return Chromossome
      */
     public static Chromossome fromMessage(ArrayList<Object> list) {
-        return new Chromossome(list.stream()
-                .map((object) -> geneFromObject(object))
-                .collect(Collectors.toList()).toArray(new Gene[] {}));
+        Gene[] genes = new Gene[list.size()];
+        for (int i = 0; i < genes.length; i++) {
+            genes[i] = geneFromObject(list.get(i));
+        }
+        return new Chromossome(genes);
     }
     
+    /**
+     * Converte um objeto para um Gene
+     * 
+     * @param object
+     * @return Gene
+     */
     private static Gene geneFromObject(Object object) {
+        if (object == null) {
+            return new ProcessTypeGene(null);
+        }
         try {
             return new NumericGene(Double.parseDouble(object.toString()));
         } catch (NumberFormatException e) {
