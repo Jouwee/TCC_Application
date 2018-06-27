@@ -26,7 +26,13 @@ public class ImageLoader {
     }
     
     public static Image labeled(String name) throws IOException {
-        return ImageFactory.buildRGBImage(labeledBuffered(name));
+        Image image = ImageFactory.buildRGBImage(labeledBuffered(name));
+        for (int x = 0; x < image.getWidth(); x++) {
+            for (int y = 0; y < image.getHeight(); y++) {
+                image.set(0, x, y, !(image.get(0, x, y) == 255 && image.get(1, x, y) == 0 && image.get(2, x, y) == 0) ? 1 : 0);
+            }
+        }
+        return image;
     }
     
     public static BufferedImage labeledBuffered(String name) throws IOException {

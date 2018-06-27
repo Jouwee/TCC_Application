@@ -1,15 +1,9 @@
 package com.github.jouwee.tcc_projeto;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import com.github.jouwee.tcc_projeto.model.GenerationParameters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import visnode.application.NodeNetwork;
-import visnode.application.parser.NodeNetworkParser;
 
 public class GeneticAlgorithmController {
     
@@ -75,7 +69,7 @@ public class GeneticAlgorithmController {
 
     public void generateStartPopulation() {
         currentPopulation = new Population();
-        for (int i = 0; i < model.getPopulationSize(); i++) {
+        for (int i = 0; i < model.getCurrentGenerationParameters().getPopulationSize(); i++) {
             currentPopulation.add(ChromossomeFactory.random());
         }
     }
@@ -90,7 +84,7 @@ public class GeneticAlgorithmController {
         double i = 0;
         for (Chromossome chromossome : currentPopulation.getChromossomes()) {
             i++;
-            double pct = (i / model.getPopulationSize());
+            double pct = (i / currentPopulation.size());
             if (pct != oldPct) {
                 model.setCurrentGenerationProgress(pct);
                 oldPct = pct;
@@ -114,7 +108,35 @@ public class GeneticAlgorithmController {
     }
     
     public void createNextGeneration() {
-        List<Chromossome> chromossomes = currentPopulation.getChromossomes();
+        GenerationParameters parameters = model.getCurrentGenerationParameters();
+        List<Chromossome> parentPool = getParentPool(sortChromossomesByFitness(currentPopulation.getChromossomes()));
+        Population newPopulation = new Population();
+       
+        int numberOfMutations = (int) (parameters.getMutationPercentage() * parameters.getPopulationSize());
+        for (Chromossome selected : selectFittests(parentPool, numberOfMutations)) {
+            newPopulation.add(ChromossomeFactory.mutate(selected, parameters.getMutationChance()));
+        }
+        
+        int numberOfCrossovers = (int) (parameters.getCrossoverPercentage() * parameters.getPopulationSize());
+        for (int i = 0; i < numberOfCrossovers; i++) {
+            newPopulation.add(ChromossomeFactory.uniformCrossover(selectFittest(parentPool), selectFittest(parentPool)));
+        }
+        
+        int numberOfSurvivors = parameters.getPopulationSize() - newPopulation.size();
+        for (Chromossome selected : selectFittests(parentPool, numberOfSurvivors)) {
+            newPopulation.add(selected);
+        }
+
+        currentPopulation = newPopulation;
+    }
+    
+    /**
+     * Ordena os cromossomos pela sua função de avaliação
+     * 
+     * @param chromossomes
+     * @return List
+     */
+    private List<Chromossome> sortChromossomesByFitness(List<Chromossome> chromossomes) {
         chromossomes.sort((c1, c2) -> {
             if (c1.getResult().getAverage() > c2.getResult().getAverage()) {
                 return 1;
@@ -124,58 +146,48 @@ public class GeneticAlgorithmController {
             }
             return 0;
         });
-        
-        for (int i = 0; i < chromossomes.size(); i++) {
-            int gen = model.getCurrentGeneration();
-            Chromossome c = chromossomes.get(i);
-            NodeNetwork network = new ChromossomeNetworkConverter(true).convert(c);
-            NodeNetworkParser parser = new NodeNetworkParser();
-            String path = System.getProperty("user.home") + "/Desktop/gens/" + gen + "/";
-            try {
-                Files.createDirectories(Paths.get(path));
-                try (PrintWriter writer = new PrintWriter(new File(path + i + "_" + c.getResult().getAverage() + ".vnp"), "UTF-8")) {
-                    writer.print(parser.toJson(network));
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
-        
-        Population newPopulation = new Population();
-        for (Chromossome chromossome : chromossomes) {
-            newPopulation.add(chromossome);
-        }
-        
-        Chromossome best = newPopulation.remove(newPopulation.size() - 1);
-        
-        // Kills 80% of the population
-        for (int i = 0; i < model.getPopulationSize() * 0.7; i++) {
-            for (int j = 0; j < newPopulation.size(); j++) {
-                if (Math.random() > 0.5) {
-                    newPopulation.remove(j);
-                    break;
-                }
-            }
-        }
-        // make sure the best survives
-        newPopulation.add(best);
-        
-        
+        return chromossomes;
+    } 
+    
+    /**
+     * Cria o Pool de chromossomos
+     * 
+     * @param chromossomes
+     * @return List
+     */
+    private List<Chromossome> getParentPool(List<Chromossome> chromossomes) {
         List<Chromossome> parentPool = new ArrayList<>();
         for (int i = 0; i < chromossomes.size(); i++) {
             for (int j = 0; j < i; j++) {
                 parentPool.add(chromossomes.get(i));
             }
-        }        
-        
-        for (int i = newPopulation.size(); i < model.getPopulationSize(); i++) {
-            Chromossome parent1 = parentPool.get((int) (Math.random() * parentPool.size()));
-            Chromossome parent2 = parentPool.get((int) (Math.random() * parentPool.size()));
-            Chromossome child = ChromossomeFactory.uniformCrossover(parent1, parent2);
-            child = ChromossomeFactory.mutate(child);
-            newPopulation.add(child);
+        }      
+        return parentPool;
+    }
+    
+    /**
+     * Seleciona os N indivíduos com maior Fitness
+     * 
+     * @param parentPool
+     * @param count
+     * @return List
+     */
+    private List<Chromossome> selectFittests(List<Chromossome> parentPool, int count) {
+        List<Chromossome> ret = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            ret.add(parentPool.get((int) (Math.random() * parentPool.size())));
         }
-        currentPopulation = newPopulation;
+        return ret;
+    }
+    
+    /**
+     * Seleciona um indivíduos com maior Fitness
+     * 
+     * @param parentPool
+     * @return List
+     */
+    private Chromossome selectFittest(List<Chromossome> parentPool) {
+        return selectFittests(parentPool, 1).get(0);
     }
 
 }

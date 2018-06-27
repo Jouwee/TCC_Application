@@ -135,10 +135,10 @@ public class ChromossomeFactory {
         return new Chromossome(genes);
     }
 
-    static Chromossome mutate(Chromossome c) {
+    static Chromossome mutate(Chromossome c, double rate) {
         Gene[] genes = new Gene[c.getGenes().length];
         for (int i = 0; i < genes.length; i++) {
-            if (Math.random() < 0.005) {
+            if (Math.random() < rate) {
                 if (c.getGenes()[i] instanceof ProcessTypeGene) {
                     genes[i] = new ProcessTypeGene(PROCESSES[(int)(Math.random() * PROCESSES.length)]);
                 } else {

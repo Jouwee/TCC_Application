@@ -16,7 +16,14 @@
             <div class="card-body">
                 <button type="button" class="btn btn-primary btn-block" (click)="runSingle()" [disabled]="model.state != 'idle'">Run one</button>
                 <button type="button" class="btn btn-primary btn-block" (click)="runForever()" [disabled]="model.state != 'idle'">Run</button>
-                <button type="button" class="btn btn-primary btn-block" (click)="interrupt()" [disabled]="model.state == 'idle'">Interupt</button>
+                <button type="button" class="btn btn-primary btn-block" (click)="interrupt()">Interupt</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-body">
+                {{model.simulationParameters | json}}
             </div>
         </div>
     </div>

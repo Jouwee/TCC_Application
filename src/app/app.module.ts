@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { RouterModule, Routes } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
+import { AngularFontAwesomeModule } from 'angular-font-awesome';
 
 import { AppComponent } from './app.component';
 import { LoadingSpinnerComponent } from './loading-spinner/loading-spinner.component';
@@ -36,6 +37,7 @@ const appRoutes: Routes = [
   imports: [
     BrowserModule,
     HttpClientModule,
+    AngularFontAwesomeModule,
     NgbModule.forRoot(),
     RouterModule.forRoot(
       appRoutes

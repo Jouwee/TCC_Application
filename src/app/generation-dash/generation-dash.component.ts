@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ModelService } from '../model.service';
 import { SpeciesService } from '../species.service';
 import { DomSanitizer } from '@angular/platform-browser';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-generation-dash',
@@ -16,7 +17,7 @@ export class GenerationDashComponent implements OnInit, OnDestroy {
   private sub: any;
   public image;
 
-  constructor(private route: ActivatedRoute, public model: ModelService, private species: SpeciesService, private _sanitizer: DomSanitizer) {}
+  constructor(private router: Router, private route: ActivatedRoute, public model: ModelService, private species: SpeciesService, private _sanitizer: DomSanitizer) { }
 
   ngOnInit() {
     this.sub = this.route.params.subscribe(params => {
@@ -35,7 +36,15 @@ export class GenerationDashComponent implements OnInit, OnDestroy {
   }
 
   open(chromossome) {
-    this.model.send({message: "openChromossome", payload: chromossome});
+    this.model.send({ message: "openChromossome", payload: chromossome });
+  }
+
+  prevGen() {
+    this.router.navigateByUrl('/gen/'+ (this.number - 1));
+  }
+
+  nextGen() {
+    this.router.navigateByUrl('/gen/'+ (this.number + 1));
   }
 
   ngOnDestroy() {

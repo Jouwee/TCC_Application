@@ -42,14 +42,11 @@ public class IndividualEvaluator {
     
     public CompletableFuture<IndividualResult> evaluate(Chromossome chromossome) {
         try {
-            CompletableFuture<ImageCompareResult>[] results = new CompletableFuture[inputImage.length];
+            CompletableFuture<Void>[] results = new CompletableFuture[inputImage.length];
+            AtomicDouble sum = new AtomicDouble();
             for (int i = 0; i < inputImage.length; i++) {
                 NodeNetwork network = new ChromossomeNetworkConverter().convert(chromossome);
-                results[i] = new NetworkEvaluator(inputImage[i], expected[i]).evaluate(network);
-            }
-            AtomicDouble sum = new AtomicDouble();
-            for (CompletableFuture<ImageCompareResult> result : results) {
-                result.acceptEither(timeoutAfter(1, TimeUnit.SECONDS), (res) -> {
+                results[i] = new NetworkEvaluator(inputImage[i], expected[i]).evaluate(network).thenAccept((res) -> {
                     sum.addAndGet(res.getCorrectPercentage());
                 });
             }

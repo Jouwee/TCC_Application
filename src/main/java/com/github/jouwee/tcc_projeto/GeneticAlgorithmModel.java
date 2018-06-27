@@ -1,5 +1,7 @@
 package com.github.jouwee.tcc_projeto;
 
+import com.github.jouwee.tcc_projeto.model.GenerationParameters;
+import com.github.jouwee.tcc_projeto.model.SimulationParameters;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,16 +9,17 @@ import java.util.Map;
 
 public class GeneticAlgorithmModel {
 
+    /** Parâmetros da simulação */
+    private final SimulationParameters simulationParameters;
+    private final List<GenerationResult> generationResults;
     private transient final List<MessageProcessor> messageProcessors;
-    private int populationSize;
     private int currentGeneration;
     private double currentGenerationProgress;
     private String state;
-    private final List<GenerationResult> generationResults;
 
     public GeneticAlgorithmModel() {
         this.messageProcessors = new ArrayList<>();
-        this.populationSize = 100;
+        this.simulationParameters = SimulationParameters.create();
         this.generationResults = new ArrayList<>();
         this.state = "idle";
     }
@@ -60,16 +63,7 @@ public class GeneticAlgorithmModel {
     public void incrementCurrentGeneration() {
         setCurrentGeneration(getCurrentGeneration() + 1);
     }
-
-    public void setPopulationSize(int populationSize) {
-        this.populationSize = populationSize;
-        sendModelUpdate("populationSize", populationSize);
-    }
-
-    public int getPopulationSize() {
-        return this.populationSize;
-    }
-
+    
     public double getCurrentGenerationProgress() {
         return currentGenerationProgress;
     }
@@ -96,6 +90,15 @@ public class GeneticAlgorithmModel {
     public void setState(String state) {
         this.state = state;
         sendModelUpdate("state", state);
+    }
+    
+    /**
+     * Retorna os parâmetros da geração atual
+     * 
+     * @return GenerationParameters
+     */
+    public GenerationParameters getCurrentGenerationParameters() {
+        return simulationParameters.getForGeneration(currentGeneration);
     }
     
 }
