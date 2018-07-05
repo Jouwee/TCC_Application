@@ -1,14 +1,17 @@
 package com.github.jouwee.tcc_projeto;
 
 import com.github.jouwee.tcc_projeto.model.GenerationParameters;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class GeneticAlgorithmController {
-    
+
     private static GeneticAlgorithmController instance;
-    private Population currentPopulation;
     private final GeneticAlgorithmModel model;
     private CompletableFuture<GenerationResult> generationFuture;
 
@@ -26,10 +29,10 @@ public class GeneticAlgorithmController {
     public void onMessage(MessageProcessor processor) {
         model.onMessage(processor);
     }
-    
+
     /**
      * Runs a single generation
-     * 
+     *
      * @return CompletableFuture
      */
     public CompletableFuture<Void> runGeneration() {
@@ -42,6 +45,7 @@ public class GeneticAlgorithmController {
         try {
             return simulateGeneration().thenAccept((res) -> {
                 model.addGenerationResults(res);
+                saveBackup();
             });
         } catch (Throwable e) {
             CompletableFuture<Void> future = new CompletableFuture<>();
@@ -49,16 +53,16 @@ public class GeneticAlgorithmController {
             return future;
         }
     }
-    
+
     /**
      * Executa as simulações em Loop
      */
     public void keepRunning() {
         runGeneration().thenAccept((v) -> {
-           keepRunning();
+            keepRunning();
         });
     }
-    
+
     public void interrupt() {
         generationFuture.cancel(true);
     }
@@ -68,10 +72,11 @@ public class GeneticAlgorithmController {
     }
 
     public void generateStartPopulation() {
-        currentPopulation = new Population();
+        Population pop = new Population();
         for (int i = 0; i < model.getCurrentGenerationParameters().getPopulationSize(); i++) {
-            currentPopulation.add(ChromossomeFactory.random());
+            pop.add(ChromossomeFactory.random());
         }
+        model.setCurrentPopulation(pop);
     }
 
     public CompletableFuture<GenerationResult> simulateGeneration() {
@@ -82,9 +87,10 @@ public class GeneticAlgorithmController {
         List<IndividualResult> results = new ArrayList<>();
         double oldPct = 0;
         double i = 0;
-        for (Chromossome chromossome : currentPopulation.getChromossomes()) {
+        Population population = model.getCurrentPopulation();
+        for (Chromossome chromossome : population.getChromossomes()) {
             i++;
-            double pct = (i / currentPopulation.size());
+            double pct = (i / population.size());
             if (pct != oldPct) {
                 model.setCurrentGenerationProgress(pct);
                 oldPct = pct;
@@ -102,37 +108,41 @@ public class GeneticAlgorithmController {
             });
             double sum = results.stream().map((r) -> r.getAverage()).reduce(0d, (s, avg) -> s + avg);
             model.setState("idle");
-            generationFuture.complete(new GenerationResult(model.getCurrentGeneration(), sum / currentPopulation.size(), results));
+            generationFuture.complete(new GenerationResult(model.getCurrentGeneration(), sum / population.size(), results));
         });
         return generationFuture;
     }
-    
-    public void createNextGeneration() {
-        GenerationParameters parameters = model.getCurrentGenerationParameters();
-        List<Chromossome> parentPool = getParentPool(sortChromossomesByFitness(currentPopulation.getChromossomes()));
-        Population newPopulation = new Population();
-       
-        int numberOfMutations = (int) (parameters.getMutationPercentage() * parameters.getPopulationSize());
-        for (Chromossome selected : selectFittests(parentPool, numberOfMutations)) {
-            newPopulation.add(ChromossomeFactory.mutate(selected, parameters.getMutationChance()));
-        }
-        
-        int numberOfCrossovers = (int) (parameters.getCrossoverPercentage() * parameters.getPopulationSize());
-        for (int i = 0; i < numberOfCrossovers; i++) {
-            newPopulation.add(ChromossomeFactory.uniformCrossover(selectFittest(parentPool), selectFittest(parentPool)));
-        }
-        
-        int numberOfSurvivors = parameters.getPopulationSize() - newPopulation.size();
-        for (Chromossome selected : selectFittests(parentPool, numberOfSurvivors)) {
-            newPopulation.add(selected);
-        }
 
-        currentPopulation = newPopulation;
+    public void createNextGeneration() {
+        try {
+            GenerationParameters parameters = model.getCurrentGenerationParameters();
+            List<Chromossome> parentPool = getParentPool(sortChromossomesByFitness(model.getCurrentPopulation().getChromossomes()));
+            Population newPopulation = new Population();
+
+            int numberOfMutations = (int) (parameters.getMutationPercentage() * parameters.getPopulationSize());
+            for (Chromossome selected : selectFittests(parentPool, numberOfMutations)) {
+                newPopulation.add(ChromossomeFactory.mutate(selected, parameters.getMutationChance()));
+            }
+
+            int numberOfCrossovers = (int) (parameters.getCrossoverPercentage() * parameters.getPopulationSize());
+            for (int i = 0; i < numberOfCrossovers; i++) {
+                newPopulation.add(ChromossomeFactory.uniformCrossover(selectFittest(parentPool), selectFittest(parentPool)));
+            }
+
+            int numberOfSurvivors = parameters.getPopulationSize() - newPopulation.size();
+            for (Chromossome selected : selectFittests(parentPool, numberOfSurvivors)) {
+                newPopulation.add(selected);
+            }
+
+            model.setCurrentPopulation(newPopulation);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
-    
+
     /**
      * Ordena os cromossomos pela sua função de avaliação
-     * 
+     *
      * @param chromossomes
      * @return List
      */
@@ -147,11 +157,11 @@ public class GeneticAlgorithmController {
             return 0;
         });
         return chromossomes;
-    } 
-    
+    }
+
     /**
      * Cria o Pool de chromossomos
-     * 
+     *
      * @param chromossomes
      * @return List
      */
@@ -161,13 +171,13 @@ public class GeneticAlgorithmController {
             for (int j = 0; j < i; j++) {
                 parentPool.add(chromossomes.get(i));
             }
-        }      
+        }
         return parentPool;
     }
-    
+
     /**
      * Seleciona os N indivíduos com maior Fitness
-     * 
+     *
      * @param parentPool
      * @param count
      * @return List
@@ -179,15 +189,78 @@ public class GeneticAlgorithmController {
         }
         return ret;
     }
-    
+
     /**
      * Seleciona um indivíduos com maior Fitness
-     * 
+     *
      * @param parentPool
      * @return List
      */
     private Chromossome selectFittest(List<Chromossome> parentPool) {
         return selectFittests(parentPool, 1).get(0);
+    }
+
+    /**
+     * Salva um Backup
+     */
+    public void saveBackup() {
+        save("Backup_" + System.currentTimeMillis() + ".json");
+    }
+
+    /**
+     * Salva o modelo com o nome especificado
+     *
+     * @param fileName
+     */
+    public void save(String fileName) {
+        try {
+            Files.write(getPath(fileName), save());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Retorna os bytes do modelo
+     *
+     * @return byte
+     */
+    public byte[] save() {
+        return JsonHelper.get().toJson(model).getBytes();
+    }
+
+    /**
+     * Carrega o modelo a partir de um arquivo
+     *
+     * @param fileName
+     */
+    public void load(String fileName) {
+        try {
+            load(Files.readAllBytes(getPath(fileName)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Carrega o modelo a partir de um arquivo
+     *
+     * @param bytes
+     */
+    public void load(byte[] bytes) {
+        String buffer = new String(bytes);
+        GeneticAlgorithmModel newModel = JsonHelper.get().fromJson(buffer, GeneticAlgorithmModel.class);
+        this.model.initialize(newModel);
+    }
+
+    /**
+     * Retorna o path de um arquivo salvo
+     *
+     * @param fileName
+     * @return String
+     */
+    private Path getPath(String fileName) {
+        return Paths.get("c:\\users\\pichau\\Desktop\\" + fileName);
     }
 
 }

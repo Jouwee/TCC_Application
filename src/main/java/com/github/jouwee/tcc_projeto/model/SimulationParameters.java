@@ -27,15 +27,15 @@ public class SimulationParameters {
      */
     public static SimulationParameters create() {
         SimulationParameters parameters = new SimulationParameters();
-        parameters.put(1, new GenerationParameters(100, 0, 0, 0));
-        parameters.put(5, new GenerationParameters(20, 0.75, 0.05, 0.01));
-        parameters.put(10, new GenerationParameters(20, 0.70, 0.10, 0.01));
-        parameters.put(20, new GenerationParameters(20, 0.60, 0.20, 0.01));
-        parameters.put(30, new GenerationParameters(20, 0.50, 0.30, 0.01));
-        parameters.put(40, new GenerationParameters(20, 0.40, 0.40, 0.01));
-        parameters.put(50, new GenerationParameters(20, 0.30, 0.50, 0.01));
-        parameters.put(60, new GenerationParameters(20, 0.20, 0.60, 0.01));
-        parameters.put(99999, new GenerationParameters(20, 0.10, 0.70, 0.01));
+        parameters.put(1, new GenerationParameters(10, 0, 0, 0));
+        parameters.put(5, new GenerationParameters(10, 0.75, 0.05, 0.01));
+        parameters.put(10, new GenerationParameters(10, 0.70, 0.10, 0.01));
+        parameters.put(20, new GenerationParameters(10, 0.60, 0.20, 0.01));
+        parameters.put(30, new GenerationParameters(10, 0.50, 0.30, 0.01));
+        parameters.put(40, new GenerationParameters(10, 0.40, 0.40, 0.01));
+        parameters.put(50, new GenerationParameters(10, 0.30, 0.50, 0.01));
+        parameters.put(60, new GenerationParameters(10, 0.20, 0.60, 0.01));
+        parameters.put(99999, new GenerationParameters(10, 0.10, 0.70, 0.01));
         return parameters;
     }
     

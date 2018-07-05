@@ -4,9 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
-import java.lang.ProcessBuilder.Redirect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Json helper for messages
@@ -68,26 +70,29 @@ public class JsonHelper {
 
         @Override
         public Chromossome read(JsonReader in) throws IOException {
-            /*final Book book = new Book();
-
-            in.beginObject();
-            while (in.hasNext()) {
-                switch (in.nextName()) {
-                    case "isbn":
-                        book.setIsbn(in.nextString());
-                        break;
-                    case "title":
-                        book.setTitle(in.nextString());
-                        break;
-                    case "authors":
-                        book.setAuthors(in.nextString().split(";"));
-                        break;
+            in.beginArray();
+            List<Gene> genes = new ArrayList<>();
+            while(in.hasNext()) {
+                JsonToken token = in.peek();
+                if (token.equals(JsonToken.NULL)) {
+                    in.nextNull();
+                    genes.add(new ProcessTypeGene(null));
+                    continue;
                 }
+                String val = in.nextString();
+                try {
+                    genes.add(new NumericGene(Double.valueOf(val)));
+                } catch (Exception e) {
+                    try {
+                        genes.add(new ProcessTypeGene(Class.forName(val)));
+                    } catch (ClassNotFoundException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+                
             }
-            in.endObject();
-
-            return book;*/
-            return ChromossomeFactory.random();
+            in.endArray();
+            return new Chromossome(genes.toArray(new Gene[0]));
         }
 
         @Override

@@ -27,7 +27,7 @@ public class Teste {
                 try {
                     s.getBasicRemote().sendText(msg);
                 } catch (IOException | IllegalStateException ex) {
-                    //. . .
+                    ex.printStackTrace();
                 }
             });
             GeneticAlgorithmController.get().sendWelcomeMessage();

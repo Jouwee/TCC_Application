@@ -18,8 +18,8 @@ public class ImageComparer {
         BiFunction<Image, Image, Double> comparer = (i, i2) -> myCompare(i, i2);
 //        BiFunction<Image, Image, Double> comparer = (i, i2) -> pixelCompare(i, i2);
         
-        Image input = ImageLoader.input("29");
-        Image expected = ImageLoader.labeled("29");
+        Image input = ImageLoader.input("26");
+        Image expected = ImageLoader.labeled("26");
         Image pureBlack = ImageFactory.buildEmptyImage(expected);
         Image pureWhite = ImageFactory.buildEmptyImage(expected);
         Image pureNoise = ImageFactory.buildEmptyImage(expected);
@@ -69,9 +69,9 @@ public class ImageComparer {
      */
     public ImageCompareResult compare(Image result, Image expected) {
         double r = myCompare(result, expected);
-        if (r > 0) {
-            r = Math.abs(r - 0.5) * 2;
-        }
+//        if (r > 0) {
+//            r = Math.abs(r - 0.5) * 2;
+//        }
         return new ImageCompareResult(r);
     }
     

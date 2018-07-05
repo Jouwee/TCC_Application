@@ -11,6 +11,8 @@ public class GeneticAlgorithmModel {
 
     /** Parâmetros da simulação */
     private final SimulationParameters simulationParameters;
+    /** População atual */
+    private Population currentPopulation;
     private final List<GenerationResult> generationResults;
     private transient final List<MessageProcessor> messageProcessors;
     private int currentGeneration;
@@ -28,6 +30,17 @@ public class GeneticAlgorithmModel {
         setCurrentGeneration(0);
         setCurrentGenerationProgress(0);
         clearGenerationResults();
+        state = "idle";
+    }
+
+    public void initialize(GeneticAlgorithmModel another) {
+        setCurrentGeneration(another.currentGeneration);
+        setCurrentGenerationProgress(0);
+        clearGenerationResults();
+        for (GenerationResult generationResult : another.generationResults) {
+            addGenerationResults(generationResult);
+        }
+        setCurrentPopulation(another.getCurrentPopulation());
         state = "idle";
     }
 
@@ -90,6 +103,15 @@ public class GeneticAlgorithmModel {
     public void setState(String state) {
         this.state = state;
         sendModelUpdate("state", state);
+    }
+
+    public Population getCurrentPopulation() {
+        return currentPopulation;
+    }
+
+    public void setCurrentPopulation(Population currentPopulation) {
+        this.currentPopulation = currentPopulation;
+        sendModelUpdate("currentPopulation", currentPopulation);
     }
     
     /**

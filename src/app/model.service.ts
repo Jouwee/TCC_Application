@@ -15,6 +15,7 @@ export class ModelService {
   socket;
   connectionStatus:string = "connecting";
   listeners: Array<any> = [];
+  public webServiceHost = SERVER_URL;
 
   constructor(public http: HttpClient) {
     this.socket = new WebSocket(ENDPOINT_URL);
@@ -56,6 +57,10 @@ export class ModelService {
   getResultImage(id, chromossome) {
     return this.http.get(SERVER_URL + 'image/processed/' + id + "?" + JSON.stringify(chromossome))
       .pipe(map(res => (<any>res).payload));
+  }
+
+  open(binaryString) {
+    this.http.post(SERVER_URL + 'simulation/load', binaryString).subscribe((x) => {});;
   }
 
 }
