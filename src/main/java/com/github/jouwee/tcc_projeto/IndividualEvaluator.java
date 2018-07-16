@@ -26,14 +26,20 @@ public class IndividualEvaluator {
     static {
         try {
             inputImage = new Image[] {
+                ImageLoader.input("4"),
+                ImageLoader.input("5"),
+                ImageLoader.input("9"),
                 ImageLoader.input("26"),
-//                ImageLoader.input("45"),
-//                ImageLoader.input("49")
+                ImageLoader.input("45"),
+                ImageLoader.input("49")
             };
             expected = new Image[] {
+                ImageLoader.labeled("4"),
+                ImageLoader.labeled("5"),
+                ImageLoader.labeled("9"),
                 ImageLoader.labeled("26"),
-//                ImageLoader.labeled("45"),
-//                ImageLoader.labeled("49")
+                ImageLoader.labeled("45"),
+                ImageLoader.labeled("49")
             };
         } catch(Exception e) {
             e.printStackTrace();

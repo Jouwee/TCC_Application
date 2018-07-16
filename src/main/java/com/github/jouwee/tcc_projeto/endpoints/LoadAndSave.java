@@ -4,8 +4,7 @@ import com.github.jouwee.tcc_projeto.GeneticAlgorithmController;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import static java.lang.System.in;
-import static java.lang.System.out;
+import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
@@ -30,7 +29,7 @@ public class LoadAndSave extends HttpServlet {
     }
 
     public void save(HttpServletResponse response) throws IOException {
-        response.addHeader("Content-Disposition", "attachment; filename=Model.json");
+        response.addHeader("Content-Disposition", "attachment; filename=Model.model");
         response.addHeader("Content-Type", "application/octet-stream");
         response.addHeader("Content-Transfer-Encoding", "binary");
         response.addHeader("Accept-Ranges", "bytes");
@@ -57,7 +56,7 @@ public class LoadAndSave extends HttpServlet {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             IOUtils.copy(stream, baos);
-            GeneticAlgorithmController.get().load(baos.toByteArray());
+            GeneticAlgorithmController.get().load(Base64.getDecoder().decode(baos.toByteArray()));
         } catch (Exception e) {
             e.printStackTrace();
         }

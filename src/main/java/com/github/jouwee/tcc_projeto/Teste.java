@@ -5,35 +5,21 @@
  */
 package com.github.jouwee.tcc_projeto;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
-import visnode.application.NodeNetwork;
-import visnode.application.parser.NodeNetworkParser;
 
 @ServerEndpoint("/teste")
 public class Teste {
 
     @OnOpen
     public void abrir(Session s) {
-        try {
-            GeneticAlgorithmController.get().onMessage((msg) -> {
-                try {
-                    s.getBasicRemote().sendText(msg);
-                } catch (IOException | IllegalStateException ex) {
-                    ex.printStackTrace();
-                }
-            });
-            GeneticAlgorithmController.get().sendWelcomeMessage();
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
+        GeneticAlgorithmController.get().onMessage(new SafeMessageProcessor(s, (msg) -> {
+            s.getBasicRemote().sendText(msg);
+        }));
+        GeneticAlgorithmController.get().sendWelcomeMessage();
     }
 
     @OnMessage
@@ -63,12 +49,6 @@ public class Teste {
             });
             return ok();
         }
-        if (message.getMessage().equals("openChromossome")) {
-            Executors.newSingleThreadExecutor().submit(() -> {
-                open(ChromossomeFactory.fromMessage((ArrayList) message.getPayload()));
-            });
-            return ok();
-        }
         return "{\"message\": \"unknown command: " + mensagem + "\"}";
     }
     
@@ -80,25 +60,51 @@ public class Teste {
     private String ok() {
         return "{\"message\": \"ok\"}";
     }
-
+    
     /**
-     * Open a project from VisNode
-     * 
-     * @param chromossome 
+     * MessageProcessor that allows exceptions
      */
-    private void open(Chromossome chromossome) {
-        try {
-            NodeNetwork network = new ChromossomeNetworkConverter(true).convert(chromossome);
-            NodeNetworkParser parser = new NodeNetworkParser();
-            String file = "c:\\users\\pichau\\desktop\\visnode.vnp";
-            try (PrintWriter writer = new PrintWriter(new File(file), "UTF-8")) {
-                writer.print(parser.toJson(network));
-            }
-            Runtime rt = Runtime.getRuntime();
-            rt.exec("C:\\Users\\Pichau\\Desktop\\VISNode-1.2.2\\visnode-windows.bat " + file, null, new File("C:\\Users\\Pichau\\Desktop\\VISNode-1.2.2\\"));
-        } catch (Exception e) {
-            e.printStackTrace();
+    public interface UnsafeMessageProcessor {
+
+        /**
+         * Process the message
+         * 
+         * @param message
+         * @throws Exception 
+         */
+        public void process(String message) throws Exception;
+    
+    }
+    
+    /**
+     * Message processor that receives and unsafe message processor and treat it safely
+     */
+    public class SafeMessageProcessor implements MessageProcessor {
+        
+        /** Session to close if error */
+        private final Session session;
+        /** Processor */
+        private final UnsafeMessageProcessor processor;
+
+        public SafeMessageProcessor(Session basicEndpoint, UnsafeMessageProcessor processor) {
+            this.processor = processor;
+            this.session = basicEndpoint;
         }
+
+        @Override
+        public void process(String message) {
+            try {
+                this.processor.process(message);
+            } catch (IllegalStateException ex) {
+                GeneticAlgorithmController.get().removeOnMessage(this);
+                try {
+                    session.close();
+                } catch (Exception e) {};
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        
     }
 
 }

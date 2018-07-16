@@ -37,15 +37,28 @@ public class GeneticAlgorithmModel {
         setCurrentGeneration(another.currentGeneration);
         setCurrentGenerationProgress(0);
         clearGenerationResults();
-        for (GenerationResult generationResult : another.generationResults) {
-            addGenerationResults(generationResult);
-        }
+        this.generationResults.addAll(another.generationResults);
+        sendModelUpdate("generationResults", generationResults);
         setCurrentPopulation(another.getCurrentPopulation());
         state = "idle";
     }
 
+    /**
+     * Adiciona um listener de mensagens
+     * 
+     * @param listener 
+     */
     public synchronized void onMessage(MessageProcessor listener) {
         this.messageProcessors.add(listener);
+    }
+
+    /**
+     * Remove um listener de mensagens
+     * 
+     * @param listener 
+     */
+    public synchronized void removeOnMessage(MessageProcessor listener) {
+        this.messageProcessors.remove(listener);
     }
 
     public synchronized void sendMessage(Message message) {
@@ -53,7 +66,7 @@ public class GeneticAlgorithmModel {
     }
 
     public synchronized void sendMessage(String message) {
-        for (MessageProcessor listener : messageProcessors) {
+        for (MessageProcessor listener : new ArrayList<>(messageProcessors)) {
             listener.process(message);
         }
     }
@@ -75,6 +88,10 @@ public class GeneticAlgorithmModel {
 
     public void incrementCurrentGeneration() {
         setCurrentGeneration(getCurrentGeneration() + 1);
+    }
+    
+    public void decrementCurrentGeneration() {
+        setCurrentGeneration(getCurrentGeneration() - 1);
     }
     
     public double getCurrentGenerationProgress() {

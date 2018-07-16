@@ -5,10 +5,6 @@
  */
 package com.github.jouwee.tcc_projeto;
 
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import visnode.pdi.process.AverageBlurProcess;
 import visnode.pdi.process.BrightnessProcess;
 import visnode.pdi.process.CannyProcess;
@@ -22,7 +18,6 @@ import visnode.pdi.process.HoltProcess;
 import visnode.pdi.process.InvertColorProcess;
 import visnode.pdi.process.MedianBlurProcess;
 import visnode.pdi.process.OpeningProcess;
-// import visnode.pdi.process.PointInPolygonFillProcess;
 import visnode.pdi.process.PrewittProcess;
 import visnode.pdi.process.RobertsProcess;
 import visnode.pdi.process.RobinsonProcess;
@@ -55,18 +50,17 @@ public class ChromossomeFactory {
         RobinsonProcess.class,
         PrewittProcess.class,
         CannyProcess.class,
-        SnakeProcess.class,
+//        SnakeProcess.class,
         ZhangSuenProcess.class,
         StentifordProcess.class,
         HoltProcess.class,
         AverageBlurProcess.class,
         MedianBlurProcess.class,
         GaussianBlurProcess.class,
-        // PointInPolygonFillProcess.class,
         null
     };
     /** Maximum number of processes */
-    public static final int MAX_PROCESSES = 9;
+    public static final int MAX_PROCESSES = 6;
     
     /**
      * Cria um novo cromossomo aleatório
@@ -85,42 +79,6 @@ public class ChromossomeFactory {
             genes[i++] = new NumericGene(Math.random());
         }
         return new Chromossome(genes);
-    }
-    
-    /**
-     * Returns a chromossome from a message
-     * 
-     * @param list
-     * @return Chromossome
-     */
-    public static Chromossome fromMessage(ArrayList<Object> list) {
-        Gene[] genes = new Gene[list.size()];
-        for (int i = 0; i < genes.length; i++) {
-            genes[i] = geneFromObject(list.get(i));
-        }
-        return new Chromossome(genes);
-    }
-    
-    /**
-     * Converte um objeto para um Gene
-     * 
-     * @param object
-     * @return Gene
-     */
-    private static Gene geneFromObject(Object object) {
-        if (object == null) {
-            return new ProcessTypeGene(null);
-        }
-        try {
-            return new NumericGene(Double.parseDouble(object.toString()));
-        } catch (NumberFormatException e) {
-            try {
-                return new ProcessTypeGene(Class.forName(object.toString()));
-            } catch (ClassNotFoundException ex) {
-                Logger.getLogger(ChromossomeFactory.class.getName()).log(Level.SEVERE, null, ex);
-                return null;
-            }
-        }
     }
 
     static Chromossome uniformCrossover(Chromossome parent1, Chromossome parent2) {

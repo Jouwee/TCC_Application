@@ -148,9 +148,8 @@ export class HomeComponent implements OnInit {
     }
 
     createSpeciesChart() {
-
         let seriesCount = {};
-        let generations = (<any>this.model).generationResults.slice().reverse();
+        let generations = (<any>this.model).generationResults.slice(0, 10).reverse();
         for (const i in generations) {
             let generation = generations[i];
             for (let individual of generation.individuals) {

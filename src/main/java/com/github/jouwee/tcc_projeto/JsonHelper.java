@@ -7,6 +7,8 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,6 +61,18 @@ public class JsonHelper {
      * @param type
      * @return T
      */
+    public <T> T fromJson(InputStream json, Class<T> type) {
+        return gson.fromJson(new InputStreamReader(json), type);
+    }
+
+    /**
+     * Converts a json into anything
+     * 
+     * @param <T>
+     * @param json
+     * @param type
+     * @return T
+     */
     public <T> T fromJson(String json, Class<T> type) {
         return gson.fromJson(json, type);
     }
@@ -84,7 +98,7 @@ public class JsonHelper {
                     genes.add(new NumericGene(Double.valueOf(val)));
                 } catch (Exception e) {
                     try {
-                        genes.add(new ProcessTypeGene(Class.forName(val)));
+                        genes.add(new ProcessTypeGene(Class.forName("visnode.pdi.process." + val + "Process")));
                     } catch (ClassNotFoundException ex) {
                         ex.printStackTrace();
                     }
@@ -103,9 +117,10 @@ public class JsonHelper {
                     out.nullValue();
                 } else {
                     if (gene instanceof ProcessTypeGene) {
-                        out.value(((ProcessTypeGene)gene).value().getCanonicalName());
+                        out.value(((ProcessTypeGene)gene).value().getSimpleName().replace("Process", ""));
                     } else {
-                        out.value(gene.value().toString());
+                        String svalue = gene.value().toString();
+                        out.value(svalue.substring(0, Math.min(6, svalue.length() - 1)));
                     }
                 }
             }

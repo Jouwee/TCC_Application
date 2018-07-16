@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable, Observer } from 'rxjs';
 import { ModelService } from './model.service';
 
 @Component({
@@ -16,10 +15,7 @@ export class AppComponent implements OnInit {
         document.getElementById('loadFile').addEventListener('change', function () {
             var reader = new FileReader();
             reader.onload = function () {
-                var arrayBuffer = this.result,
-                    array = new Uint8Array(arrayBuffer),
-                    binaryString = String.fromCharCode.apply(null, array);
-                model.open(binaryString);
+                model.open(this.result);
             }
             reader.readAsArrayBuffer((<any>this).files[0]);
         }, false);

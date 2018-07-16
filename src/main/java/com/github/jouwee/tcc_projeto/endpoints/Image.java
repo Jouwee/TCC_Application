@@ -1,7 +1,6 @@
 package com.github.jouwee.tcc_projeto.endpoints;
 
 import com.github.jouwee.tcc_projeto.Chromossome;
-import com.github.jouwee.tcc_projeto.ChromossomeFactory;
 import com.github.jouwee.tcc_projeto.ChromossomeNetworkConverter;
 import com.github.jouwee.tcc_projeto.ImageLoader;
 import com.github.jouwee.tcc_projeto.JsonHelper;
@@ -12,7 +11,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLDecoder;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,7 +50,7 @@ public class Image extends HttpServlet {
                 image = ImageLoader.inputBuffered(id);
             }
             if (group.equals("processed")) {
-                Chromossome chr = ChromossomeFactory.fromMessage(JsonHelper.get().fromJson(chromossome, ArrayList.class));
+                Chromossome chr = JsonHelper.get().fromJson(chromossome, Chromossome.class);
                 NodeNetwork network = new ChromossomeNetworkConverter().convert(chr);
                 org.paim.commons.Image img = new NetworkExecutor().run(network, ImageLoader.input(id)).get();
                 image = ImageConverter.toBufferedImage(img);

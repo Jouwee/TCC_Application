@@ -9,6 +9,7 @@ import visnode.pdi.process.BrightnessProcess;
 import visnode.pdi.process.ContrastProcess;
 import visnode.pdi.process.GaussianBlurProcess;
 import visnode.pdi.process.InputProcess;
+import visnode.pdi.process.SnakeProcess;
 import visnode.pdi.process.ThresholdProcess;
 import visnode.pdi.process.WeightedGrayscaleProcess;
 
@@ -42,6 +43,7 @@ public class ChromossomeNetworkConverter {
             last = createNode(InputProcess.class, last);
             network.add(last);
         }
+        boolean binary = false;
         Gene[] genes = chromossome.getGenes();
         for (int i = 0; i < genes.length;) {
             ProcessTypeGene pgene = (ProcessTypeGene) genes[i++];
@@ -53,11 +55,16 @@ public class ChromossomeNetworkConverter {
             if (c == null) {
                 break;
             }
+            if (c == ThresholdProcess.class || c == SnakeProcess.class) {
+                binary = true;
+            }
             EditNodeDecorator node = createProcess(c, last, params);
             network.add(node);
             last = node;
         }
-        network.add(createNode(ThresholdProcess.class, last));
+        if (!binary) {
+            network.add(createNode(ThresholdProcess.class, last));
+        }
         return network;
     }
     

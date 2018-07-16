@@ -9,35 +9,35 @@ export class SpeciesService {
 
   getSpecies(chromossome) {
     let dictionary = {
-      "visnode.pdi.process.GrayscaleProcess": "Gr",
-      "visnode.pdi.process.WeightedGrayscaleProcess": "We",
-      "visnode.pdi.process.ThresholdProcess": "Th",
-      "visnode.pdi.process.InvertColorProcess": "In",
-      "visnode.pdi.process.OpeningProcess": "Op",
-      "visnode.pdi.process.ClosingProcess": "Cl",
-      "visnode.pdi.process.DilationProcess": "Di",
-      "visnode.pdi.process.ErosionProcess": "Er",
-      "visnode.pdi.process.BrightnessProcess": "Br",
-      "visnode.pdi.process.ContrastProcess": "Co",
-      "visnode.pdi.process.SobelProcess": "So",
-      "visnode.pdi.process.RobertsProcess": "Ro",
-      "visnode.pdi.process.RobinsonProcess": "Rn",
-      "visnode.pdi.process.PrewittProcess": "Pr",
-      "visnode.pdi.process.CannyProcess": "Ca",
-      "visnode.pdi.process.SnakeProcess": "Sn",
-      "visnode.pdi.process.ZhangSuenProcess": "Zh",
-      "visnode.pdi.process.StentifordProcess": "St",
-      "visnode.pdi.process.HoltProcess": "Ho",
-      "visnode.pdi.process.AverageBlurProcess": "Av",
-      "visnode.pdi.process.MedianBlurProcess": "Me",
-      "visnode.pdi.process.GaussianBlurProcess": "Ga"
+      "Grayscale": "Gr",
+      "WeightedGrayscale": "We",
+      "Threshold": "Th",
+      "InvertColor": "In",
+      "Opening": "Op",
+      "Closing": "Cl",
+      "Dilation": "Di",
+      "Erosion": "Er",
+      "Brightness": "Br",
+      "Contrast": "Co",
+      "Sobel": "So",
+      "Roberts": "Ro",
+      "Robinson": "Rn",
+      "Prewitt": "Pr",
+      "Canny": "Ca",
+      "Snake": "Sn",
+      "ZhangSuen": "Zh",
+      "Stentiford": "St",
+      "Holt": "Ho",
+      "AverageBlur": "Av",
+      "MedianBlur": "Me",
+      "GaussianBlur": "Ga"
     }
     let species = "";
     for (let gene of chromossome) {
       if (gene == null) {
         break;
       }
-      if (gene.startsWith("visnode")) {
+      if (isNaN(gene)) {
         if (species.length > 0) {
           species += '-'
         }

@@ -60,7 +60,11 @@ export class ModelService {
   }
 
   open(binaryString) {
-    this.http.post(SERVER_URL + 'simulation/load', binaryString).subscribe((x) => {});;
+    this.http.post(SERVER_URL + 'simulation/load', btoa(String.fromCharCode.apply(null, new Uint8Array(binaryString)))).subscribe((x) => {});
+  }
+
+  downloadChromossome(chromossome) {
+
   }
 
 }

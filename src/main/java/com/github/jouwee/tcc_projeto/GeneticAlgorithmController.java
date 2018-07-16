@@ -1,16 +1,22 @@
 package com.github.jouwee.tcc_projeto;
 
 import com.github.jouwee.tcc_projeto.model.GenerationParameters;
+import com.github.jouwee.tcc_projeto.model.SpeciesMap;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.InflaterInputStream;
 
 public class GeneticAlgorithmController {
-
+    
     private static GeneticAlgorithmController instance;
     private final GeneticAlgorithmModel model;
     private CompletableFuture<GenerationResult> generationFuture;
@@ -26,8 +32,22 @@ public class GeneticAlgorithmController {
         return instance;
     }
 
+    /**
+     * Adds a listener for messages
+     * 
+     * @param processor 
+     */
     public void onMessage(MessageProcessor processor) {
         model.onMessage(processor);
+    }
+
+    /**
+     * Removes a listener for messages
+     * 
+     * @param processor 
+     */
+    public void removeOnMessage(MessageProcessor processor) {
+        model.removeOnMessage(processor);
     }
 
     /**
@@ -42,20 +62,25 @@ public class GeneticAlgorithmController {
         } else {
             createNextGeneration();
         }
+        CompletableFuture<Void> future = new CompletableFuture<>();
         try {
-            return simulateGeneration().thenAccept((res) -> {
+            simulateGeneration().thenAccept((res) -> {
                 model.addGenerationResults(res);
+                future.complete(null);
                 saveBackup();
+            }).exceptionally(ex -> {
+                resetGeneration();
+                future.completeExceptionally(ex);
+                return null;
             });
         } catch (Throwable e) {
-            CompletableFuture<Void> future = new CompletableFuture<>();
             future.completeExceptionally(e);
-            return future;
         }
+        return future;
     }
 
     /**
-     * Executa as simulações em Loop
+     * Run the generations in a loop
      */
     public void keepRunning() {
         runGeneration().thenAccept((v) -> {
@@ -63,6 +88,9 @@ public class GeneticAlgorithmController {
         });
     }
 
+    /**
+     * Interrupt the execution
+     */
     public void interrupt() {
         generationFuture.cancel(true);
     }
@@ -71,6 +99,9 @@ public class GeneticAlgorithmController {
         model.sendMessage(new Message("updateModel", model));
     }
 
+    /**
+     * Generates the start population
+     */
     public void generateStartPopulation() {
         Population pop = new Population();
         for (int i = 0; i < model.getCurrentGenerationParameters().getPopulationSize(); i++) {
@@ -78,12 +109,20 @@ public class GeneticAlgorithmController {
         }
         model.setCurrentPopulation(pop);
     }
+    
+    /**
+     * Resets the generation
+     */
+    public void resetGeneration() {
+        model.setState("idle");
+        model.setCurrentGenerationProgress(0);
+        model.decrementCurrentGeneration();
+    }
 
     public CompletableFuture<GenerationResult> simulateGeneration() {
         model.setState("simulating");
         model.incrementCurrentGeneration();
         generationFuture = new CompletableFuture<>();
-        List<CompletableFuture> futures = new ArrayList<>();
         List<IndividualResult> results = new ArrayList<>();
         double oldPct = 0;
         double i = 0;
@@ -95,48 +134,79 @@ public class GeneticAlgorithmController {
                 model.setCurrentGenerationProgress(pct);
                 oldPct = pct;
             }
-            CompletableFuture<IndividualResult> cFuture = new IndividualEvaluator().evaluate(chromossome);
-            futures.add(cFuture);
-            cFuture.thenAccept((r) -> {
-                chromossome.setResult(r);
-                results.add(r);
-            }).join();
+            if (chromossome.getResult() == null || chromossome.getResult().getAverage() <= 0) {
+                CompletableFuture<IndividualResult> cFuture = new IndividualEvaluator().evaluate(chromossome);
+                cFuture.thenAccept((r) -> {
+                    chromossome.setResult(r);
+                }).join();
+            }
+            if (generationFuture.isCancelled()) {
+                generationFuture.completeExceptionally(new InterruptedException());
+                return generationFuture;
+            }
+            results.add(chromossome.getResult());
         }
-        CompletableFuture.runAsync(() -> {
-            futures.forEach((future1) -> {
-                future1.join();
-            });
-            double sum = results.stream().map((r) -> r.getAverage()).reduce(0d, (s, avg) -> s + avg);
-            model.setState("idle");
-            generationFuture.complete(new GenerationResult(model.getCurrentGeneration(), sum / population.size(), results));
-        });
+        double sum = results.stream().map((r) -> r.getAverage()).reduce(0d, (s, avg) -> s + avg);
+        model.setState("idle");
+        generationFuture.complete(new GenerationResult(model.getCurrentGeneration(), sum / population.size(), results));
         return generationFuture;
     }
 
     public void createNextGeneration() {
         try {
             GenerationParameters parameters = model.getCurrentGenerationParameters();
-            List<Chromossome> parentPool = getParentPool(sortChromossomesByFitness(model.getCurrentPopulation().getChromossomes()));
+            List<Chromossome> sorted = sortChromossomesByFitness(model.getCurrentPopulation().getChromossomes());
+            List<Chromossome> parentPool = getParentPool(sorted);
             Population newPopulation = new Population();
 
-            int numberOfMutations = (int) (parameters.getMutationPercentage() * parameters.getPopulationSize());
-            for (Chromossome selected : selectFittests(parentPool, numberOfMutations)) {
-                newPopulation.add(ChromossomeFactory.mutate(selected, parameters.getMutationChance()));
+            // Keep the best
+            newPopulation.add(sorted.get(sorted.size() - 1));
+
+            int numberOfRandoms = newPopulation.size() + (int) (parameters.getRandomPercentage() * parameters.getPopulationSize());
+            while (newPopulation.size() < numberOfRandoms) {
+                addLimited(ChromossomeFactory.random(), newPopulation, parameters);
             }
 
-            int numberOfCrossovers = (int) (parameters.getCrossoverPercentage() * parameters.getPopulationSize());
-            for (int i = 0; i < numberOfCrossovers; i++) {
-                newPopulation.add(ChromossomeFactory.uniformCrossover(selectFittest(parentPool), selectFittest(parentPool)));
+            int numberOfMutations = newPopulation.size() + (int) (parameters.getMutationPercentage() * parameters.getPopulationSize());
+            while (newPopulation.size() < numberOfMutations) {
+                Chromossome selected = selectFittest(parentPool);
+                addLimited(ChromossomeFactory.mutate(selected, parameters.getMutationChance()), newPopulation, parameters);
             }
 
-            int numberOfSurvivors = parameters.getPopulationSize() - newPopulation.size();
-            for (Chromossome selected : selectFittests(parentPool, numberOfSurvivors)) {
-                newPopulation.add(selected);
+            int numberOfCrossovers = newPopulation.size() + (int) (parameters.getCrossoverPercentage() * parameters.getPopulationSize());
+            while (newPopulation.size() < numberOfCrossovers) {
+                addLimited(ChromossomeFactory.uniformCrossover(selectFittest(parentPool), selectFittest(parentPool)), newPopulation, parameters);
+            }
+
+            while (newPopulation.size() < parameters.getPopulationSize()) {
+                Chromossome selected = selectFittest(parentPool);
+                addLimited(selected, newPopulation, parameters);
             }
 
             model.setCurrentPopulation(newPopulation);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Adiciona um indivíduo de forma limitada a população
+     *
+     * @param population
+     * @param chromossome
+     * @param parameters
+     */
+    private void addLimited(Chromossome chromossome, Population population, GenerationParameters parameters) {
+        int count = 0;
+        for (Chromossome chromossome1 : population.getChromossomes()) {
+            if (SpeciesMap.getSpecies(chromossome1).equals(SpeciesMap.getSpecies(chromossome))) {
+                count++;
+            }
+        }
+        if (count < parameters.getMaxSpeciesPercentage() * parameters.getPopulationSize()) {
+            population.add(chromossome);
+        } else {
+            System.out.println(SpeciesMap.getSpecies(chromossome) + " has too many " + count);
         }
     }
 
@@ -148,6 +218,12 @@ public class GeneticAlgorithmController {
      */
     private List<Chromossome> sortChromossomesByFitness(List<Chromossome> chromossomes) {
         chromossomes.sort((c1, c2) -> {
+            if (c1 == null || c1.getResult() == null) {
+                return -1;
+            }
+            if (c2 == null || c2.getResult() == null) {
+                return 1;
+            }
             if (c1.getResult().getAverage() > c2.getResult().getAverage()) {
                 return 1;
             }
@@ -204,7 +280,7 @@ public class GeneticAlgorithmController {
      * Salva um Backup
      */
     public void saveBackup() {
-        save("Backup_" + System.currentTimeMillis() + ".json");
+        save("Backup_" + System.currentTimeMillis() + ".model");
     }
 
     /**
@@ -226,7 +302,7 @@ public class GeneticAlgorithmController {
      * @return byte
      */
     public byte[] save() {
-        return JsonHelper.get().toJson(model).getBytes();
+        return compress(JsonHelper.get().toJson(model).getBytes());
     }
 
     /**
@@ -241,6 +317,36 @@ public class GeneticAlgorithmController {
             e.printStackTrace();
         }
     }
+    
+    private byte[] compress(byte[] bytes) {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            DeflaterOutputStream dos = new DeflaterOutputStream(baos);
+            dos.write(bytes);
+            dos.flush();
+            dos.close();
+            return baos.toByteArray();
+        } catch (Exception e) {
+            return bytes;
+        }
+    }
+    
+    private byte[] decompress(byte[] bytes) {
+        try {
+            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            InflaterInputStream iis = new InflaterInputStream(bais);
+            int rlen = -1;
+            byte[] buf = new byte[5];
+             while ((rlen = iis.read(buf)) != -1) {
+                baos.write(Arrays.copyOf(buf, rlen));
+            }
+            baos.close();
+            return baos.toByteArray();
+        } catch (Exception e) {
+            return bytes;
+        }
+    }
 
     /**
      * Carrega o modelo a partir de um arquivo
@@ -248,9 +354,13 @@ public class GeneticAlgorithmController {
      * @param bytes
      */
     public void load(byte[] bytes) {
-        String buffer = new String(bytes);
-        GeneticAlgorithmModel newModel = JsonHelper.get().fromJson(buffer, GeneticAlgorithmModel.class);
-        this.model.initialize(newModel);
+        try {
+            String buffer = new String(decompress(bytes));
+            GeneticAlgorithmModel newModel = JsonHelper.get().fromJson(buffer, GeneticAlgorithmModel.class);
+            this.model.initialize(newModel);
+        } catch (Exception e) {
+            
+        }
     }
 
     /**
