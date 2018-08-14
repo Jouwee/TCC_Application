@@ -16,6 +16,23 @@ import org.paim.commons.ImageFactory;
  * @author Pichau
  */
 public class ImageLoader {
+        
+    private static Image[] inputImage;
+    private static Image[] expected;
+    
+    static {
+        try {
+            int s = 5; // 50
+            inputImage = new Image[s];
+            expected = new Image[s];
+            for (int i = 0; i < s; i++) {
+                inputImage[i] = ImageLoader.input(String.valueOf(i+1));
+                expected[i] = ImageLoader.labeled(String.valueOf(i+1));
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }   
     
     public static Image input(String name) throws IOException {
         return ImageFactory.buildRGBImage(inputBuffered(name));
@@ -23,6 +40,14 @@ public class ImageLoader {
     
     public static BufferedImage inputBuffered(String name) throws IOException {
         return ImageIO.read(ImageComparer.class.getResource("/Test_RGB/" + name + ".bmp"));
+    }
+    
+    public static Image[] allInputs() {
+        return inputImage;
+    }
+    
+    public static Image[] allExpecteds() {
+        return expected;
     }
     
     public static Image labeled(String name) throws IOException {

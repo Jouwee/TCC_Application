@@ -16,7 +16,7 @@
           Simulação
         </a>
         <div class="dropdown-menu" aria-labelledby="simulacaoDropdown">
-          <a class="dropdown-item" href="#"><i class="fa fa-file"></i> Novo</a>
+          <a class="dropdown-item" (click)="newSim()"><i class="fa fa-file"></i> Novo</a>
           <input type="file" id="loadFile" style="position: fixed; top: -100em">
           <a class="dropdown-item" (click)="open()"><i class="fa fa-folder-open"></i> Carregar</a>
           <a class="dropdown-item" href="{{model.webServiceHost}}simulation/save"><i class="fa fa-save"></i> Salvar</a>

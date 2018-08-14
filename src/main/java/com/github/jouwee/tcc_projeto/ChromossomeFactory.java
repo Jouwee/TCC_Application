@@ -5,6 +5,7 @@
  */
 package com.github.jouwee.tcc_projeto;
 
+import java.util.Random;
 import visnode.pdi.process.AverageBlurProcess;
 import visnode.pdi.process.BrightnessProcess;
 import visnode.pdi.process.CannyProcess;
@@ -21,6 +22,7 @@ import visnode.pdi.process.OpeningProcess;
 import visnode.pdi.process.PrewittProcess;
 import visnode.pdi.process.RobertsProcess;
 import visnode.pdi.process.RobinsonProcess;
+import visnode.pdi.process.FloodFillProcess;
 import visnode.pdi.process.SnakeProcess;
 import visnode.pdi.process.SobelProcess;
 import visnode.pdi.process.StentifordProcess;
@@ -50,17 +52,20 @@ public class ChromossomeFactory {
         RobinsonProcess.class,
         PrewittProcess.class,
         CannyProcess.class,
-//        SnakeProcess.class,
+        SnakeProcess.class,
         ZhangSuenProcess.class,
         StentifordProcess.class,
         HoltProcess.class,
         AverageBlurProcess.class,
         MedianBlurProcess.class,
         GaussianBlurProcess.class,
+        FloodFillProcess.class,
         null
     };
     /** Maximum number of processes */
     public static final int MAX_PROCESSES = 6;
+    /** Random */
+    private static Random random = new Random(System.currentTimeMillis());
     
     /**
      * Cria um novo cromossomo aleatório
@@ -71,12 +76,12 @@ public class ChromossomeFactory {
         int size = MAX_PROCESSES * (1 + 5);
         Gene[] genes = new Gene[size];
         for (int i = 0; i < size;) {
-            genes[i++] = new ProcessTypeGene(PROCESSES[(int)(Math.random() * PROCESSES.length)]);
-            genes[i++] = new NumericGene(Math.random());
-            genes[i++] = new NumericGene(Math.random());
-            genes[i++] = new NumericGene(Math.random());
-            genes[i++] = new NumericGene(Math.random());
-            genes[i++] = new NumericGene(Math.random());
+            genes[i++] = new ProcessTypeGene(PROCESSES[(int)(random.nextDouble() * PROCESSES.length)]);
+            genes[i++] = new NumericGene(random.nextDouble());
+            genes[i++] = new NumericGene(random.nextDouble());
+            genes[i++] = new NumericGene(random.nextDouble());
+            genes[i++] = new NumericGene(random.nextDouble());
+            genes[i++] = new NumericGene(random.nextDouble());
         }
         return new Chromossome(genes);
     }
@@ -84,7 +89,7 @@ public class ChromossomeFactory {
     static Chromossome uniformCrossover(Chromossome parent1, Chromossome parent2) {
         Gene[] genes = new Gene[parent1.getGenes().length];
         for (int i = 0; i < genes.length; i++) {
-            if (Math.random() < 0.5) {
+            if (random.nextDouble() < 0.5) {
                 genes[i] = parent1.getGenes()[i];
             } else {
                 genes[i] = parent2.getGenes()[i];
@@ -96,11 +101,11 @@ public class ChromossomeFactory {
     static Chromossome mutate(Chromossome c, double rate) {
         Gene[] genes = new Gene[c.getGenes().length];
         for (int i = 0; i < genes.length; i++) {
-            if (Math.random() < rate) {
+            if (random.nextDouble() < rate) {
                 if (c.getGenes()[i] instanceof ProcessTypeGene) {
-                    genes[i] = new ProcessTypeGene(PROCESSES[(int)(Math.random() * PROCESSES.length)]);
+                    genes[i] = new ProcessTypeGene(PROCESSES[(int)(random.nextDouble() * PROCESSES.length)]);
                 } else {
-                    genes[i] = new NumericGene(Math.random());
+                    genes[i] = new NumericGene(random.nextDouble());
                 }
             } else {
                 genes[i] = c.getGenes()[i];

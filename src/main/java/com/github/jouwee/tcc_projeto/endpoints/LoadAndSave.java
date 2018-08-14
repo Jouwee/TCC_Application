@@ -15,14 +15,18 @@ import org.apache.commons.io.IOUtils;
 
 public class LoadAndSave extends HttpServlet {
 
-    Pattern URI_MATCHING = Pattern.compile("/rest/simulation/(save|load)");
+    Pattern URI_MATCHING = Pattern.compile("/rest/simulation/(save|load|new)");
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         Matcher matcher = URI_MATCHING.matcher(request.getRequestURI());
         if (matcher.find()) {
-            save(response);
+            if (matcher.group(1).equals("new")) {
+                GeneticAlgorithmController.get().initialize();
+            } else {
+                save(response);
+            }
         } else {
             response.setStatus(400);
         }
@@ -54,9 +58,13 @@ public class LoadAndSave extends HttpServlet {
 
     public void load(InputStream stream) {
         try {
+            System.out.println("loading 1...");
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            System.out.println("loading 2...");
             IOUtils.copy(stream, baos);
+            System.out.println("loading 3...");
             GeneticAlgorithmController.get().load(Base64.getDecoder().decode(baos.toByteArray()));
+            System.out.println("loading done");
         } catch (Exception e) {
             e.printStackTrace();
         }

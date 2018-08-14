@@ -1,6 +1,8 @@
 package com.github.jouwee.tcc_projeto;
 
-import java.awt.Point;
+import org.paim.commons.Color;
+import org.paim.commons.Point;
+import org.paim.pdi.FloodFillProcess;
 import visnode.application.NodeNetwork;
 import visnode.commons.Threshold;
 import visnode.executor.EditNodeDecorator;
@@ -94,12 +96,17 @@ public class ChromossomeNetworkConverter {
             node.setInput("blueWeight", params[2].value());
         }
         
+        if (c == FloodFillProcess.class) {
+            node.setInput("seed", Point.CENTER);
+            node.setInput("replacement", new Color((int)(params[0].value * 255)));
+        }
+        
         return node;
     }
     
     public EditNodeDecorator createNode(Class c, EditNodeDecorator last) {
         EditNodeDecorator node = new EditNodeDecorator(new ProcessNode(c));
-        node.setPosition(new Point(x, 0));
+        node.setPosition(new java.awt.Point(x, 0));
         x += 250;
         if (last != null) {
             node.addConnection("image", last, "image");

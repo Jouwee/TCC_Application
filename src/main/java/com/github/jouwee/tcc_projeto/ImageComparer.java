@@ -7,6 +7,7 @@ import org.paim.commons.ImageFactory;
 import org.paim.pdi.ThresholdProcess;
 import visnode.pdi.process.DilationProcess;
 import visnode.pdi.process.ErosionProcess;
+import visnode.pdi.process.SobelProcess;
 
 /**
  * Class for comparing two images
@@ -36,6 +37,12 @@ public class ImageComparer {
             reduced = ero.getImage();
         }
         
+        SobelProcess sob = new SobelProcess(input);
+        sob.process();
+        ThresholdProcess tsob = new ThresholdProcess(sob.getImage(), 128);
+        tsob.process();
+        Image sobel = tsob.getOutput();
+        
         ThresholdProcess t = new ThresholdProcess(input, 128);
         t.process();
         Image thresholded = t.getOutput();
@@ -53,6 +60,7 @@ public class ImageComparer {
         System.out.println("Perfect reduced: " + comparer.apply(reduced, expected));
         System.out.println("Perfect amplified: " + comparer.apply(amplified, expected));
         System.out.println("Thresholded: " + comparer.apply(thresholded, expected));
+        System.out.println("Sobel: " + comparer.apply(sobel, expected));
         System.out.println("Pure black: " + comparer.apply(pureBlack, expected));
         System.out.println("Pure white: " + comparer.apply(pureWhite, expected));
         System.out.println("Pure noise: " + comparer.apply(pureNoise, expected));
@@ -102,6 +110,7 @@ public class ImageComparer {
     
     private static double myCompare(Image result, Image expected) {
         if (result.getWidth() != expected.getWidth() || result.getHeight() != expected.getHeight()) {
+            System.out.println("\tFAIL "+result.getWidth() +' '+ expected.getWidth() +'x'+  result.getHeight() +' '+ expected.getHeight());
             return 0d;
         }
         int perimeterExpected = 0;
@@ -135,7 +144,8 @@ public class ImageComparer {
         double perimeterRatio = 1 - Math.min(Math.abs(perimeterExpected - perimeterResult) / perimeterExpected, 1);
         double pixelRatio = (correct / (result.getWidth() * result.getHeight()));
         double edgeRatio = (double) edgeCorrect / edgeTotal;
-        return pixelRatio * 0.50 + edgeRatio * 0.25 + perimeterRatio * 0.25;
+        double r = pixelRatio * 0.50 + edgeRatio * 0.25 + perimeterRatio * 0.25;
+        return r * r;
     }
     
     /**

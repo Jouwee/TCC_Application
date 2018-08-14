@@ -74,16 +74,16 @@ export class HomeComponent implements OnInit {
 
     createAveragePerGenerationChart() {
         let data = [{
-            name: 'Best',
+            name: 'Melhor',
             color: '#218838',
             data: []
         }, {
-            name: 'Average',
+            name: 'Média',
             color: '#868e96',
             data: []
         },
         {
-            name: 'Worst',
+            name: 'Pior',
             color: '#dc3545',
             data: []
         }];
@@ -97,7 +97,7 @@ export class HomeComponent implements OnInit {
 
         this.averagePerGenerationChart = Highcharts.chart('averagePerGeneration', {
             chart: {
-                type: 'spline',
+                type: 'line',
                 animation: Highcharts.svg,
                 height: 300 
             },
@@ -112,7 +112,7 @@ export class HomeComponent implements OnInit {
             },
             yAxis: {
                 title: {
-                    text: 'Avg. assertion rate (%)'
+                    text: 'Média de Fitness (%)'
                 },
                 min: 0,
                 max: 100,
@@ -193,7 +193,7 @@ export class HomeComponent implements OnInit {
             },
             yAxis: {
                 title: {
-                    text: '# individuals'
+                    text: '# indivíduos'
                 },
                 max: (<any> this.model).populationSize,
                 min: 0,

@@ -13,7 +13,7 @@ export class ModelService {
 
   model = {};
   socket;
-  connectionStatus:string = "connecting";
+  connectionStatus: string = "connecting";
   listeners: Array<any> = [];
   public webServiceHost = SERVER_URL;
 
@@ -22,7 +22,7 @@ export class ModelService {
     this.socket.onmessage = (event) => {
       this.connectionStatus = "upToDate";
       try {
-        let data = JSON.parse(event.data);      
+        let data = JSON.parse(event.data);
         if (data.message == "updateModel") {
           for (let key in data.payload) {
             this[key] = data.payload[key];
@@ -38,7 +38,7 @@ export class ModelService {
 
     this.socket.onopen = (event) => {
       this.connectionStatus = "connected";
-    }  
+    }
   }
 
   addModelListener(listener) {
@@ -59,8 +59,14 @@ export class ModelService {
       .pipe(map(res => (<any>res).payload));
   }
 
+  newSimulation() {
+    this.http.get(SERVER_URL + 'simulation/new').subscribe((x) => { });
+  }
+
   open(binaryString) {
-    this.http.post(SERVER_URL + 'simulation/load', btoa(String.fromCharCode.apply(null, new Uint8Array(binaryString)))).subscribe((x) => {});
+    this.http.post(SERVER_URL + 'simulation/load', btoa(new Uint8Array(binaryString).reduce(function (data, byte) {
+      return data + String.fromCharCode(byte);
+    }, ''))).subscribe((x) => { });
   }
 
   downloadChromossome(chromossome) {

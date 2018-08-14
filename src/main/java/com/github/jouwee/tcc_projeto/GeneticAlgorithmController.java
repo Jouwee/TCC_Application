@@ -1,19 +1,15 @@
 package com.github.jouwee.tcc_projeto;
 
+import com.github.jouwee.tcc_projeto.helper.Compressor;
 import com.github.jouwee.tcc_projeto.model.GenerationParameters;
 import com.github.jouwee.tcc_projeto.model.SpeciesMap;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.zip.DeflaterOutputStream;
-import java.util.zip.InflaterInputStream;
 
 public class GeneticAlgorithmController {
     
@@ -56,14 +52,14 @@ public class GeneticAlgorithmController {
      * @return CompletableFuture
      */
     public CompletableFuture<Void> runGeneration() {
-        if (model.getCurrentGeneration() == 0) {
-            model.initialize();
-            generateStartPopulation();
-        } else {
-            createNextGeneration();
-        }
         CompletableFuture<Void> future = new CompletableFuture<>();
         try {
+            if (model.getCurrentGeneration() == 0) {
+                model.initialize();
+                generateStartPopulation();
+            } else {
+                createNextGeneration();
+            }
             simulateGeneration().thenAccept((res) -> {
                 model.addGenerationResults(res);
                 future.complete(null);
@@ -74,6 +70,7 @@ public class GeneticAlgorithmController {
                 return null;
             });
         } catch (Throwable e) {
+            e.printStackTrace();
             future.completeExceptionally(e);
         }
         return future;
@@ -162,7 +159,7 @@ public class GeneticAlgorithmController {
             // Keep the best
             newPopulation.add(sorted.get(sorted.size() - 1));
 
-            int numberOfRandoms = newPopulation.size() + (int) (parameters.getRandomPercentage() * parameters.getPopulationSize());
+            /*int numberOfRandoms = newPopulation.size() + (int) (parameters.getRandomPercentage() * parameters.getPopulationSize());
             while (newPopulation.size() < numberOfRandoms) {
                 addLimited(ChromossomeFactory.random(), newPopulation, parameters);
             }
@@ -181,7 +178,12 @@ public class GeneticAlgorithmController {
             while (newPopulation.size() < parameters.getPopulationSize()) {
                 Chromossome selected = selectFittest(parentPool);
                 addLimited(selected, newPopulation, parameters);
+            }*/
+            
+            for (int i = 0; i < parameters.getPopulationSize(); i++) {
+                newPopulation.add(ChromossomeFactory.random());
             }
+            
 
             model.setCurrentPopulation(newPopulation);
         } catch (Exception e) {
@@ -275,7 +277,16 @@ public class GeneticAlgorithmController {
     private Chromossome selectFittest(List<Chromossome> parentPool) {
         return selectFittests(parentPool, 1).get(0);
     }
-
+    
+    /**
+     * Inicializa a simulação
+     */
+    
+    public void initialize() {
+        this.model.initialize();
+        interrupt();
+    }
+    
     /**
      * Salva um Backup
      */
@@ -302,7 +313,7 @@ public class GeneticAlgorithmController {
      * @return byte
      */
     public byte[] save() {
-        return compress(JsonHelper.get().toJson(model).getBytes());
+        return Compressor.compress(JsonHelper.get().toJson(model).getBytes());
     }
 
     /**
@@ -317,36 +328,6 @@ public class GeneticAlgorithmController {
             e.printStackTrace();
         }
     }
-    
-    private byte[] compress(byte[] bytes) {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            DeflaterOutputStream dos = new DeflaterOutputStream(baos);
-            dos.write(bytes);
-            dos.flush();
-            dos.close();
-            return baos.toByteArray();
-        } catch (Exception e) {
-            return bytes;
-        }
-    }
-    
-    private byte[] decompress(byte[] bytes) {
-        try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            InflaterInputStream iis = new InflaterInputStream(bais);
-            int rlen = -1;
-            byte[] buf = new byte[5];
-             while ((rlen = iis.read(buf)) != -1) {
-                baos.write(Arrays.copyOf(buf, rlen));
-            }
-            baos.close();
-            return baos.toByteArray();
-        } catch (Exception e) {
-            return bytes;
-        }
-    }
 
     /**
      * Carrega o modelo a partir de um arquivo
@@ -355,7 +336,7 @@ public class GeneticAlgorithmController {
      */
     public void load(byte[] bytes) {
         try {
-            String buffer = new String(decompress(bytes));
+            String buffer = new String(Compressor.decompress(bytes));
             GeneticAlgorithmModel newModel = JsonHelper.get().fromJson(buffer, GeneticAlgorithmModel.class);
             this.model.initialize(newModel);
         } catch (Exception e) {

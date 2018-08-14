@@ -5,7 +5,6 @@
  */
 package com.github.jouwee.tcc_projeto;
 
-import io.reactivex.disposables.CompositeDisposable;
 import java.util.concurrent.CompletableFuture;
 import org.paim.commons.Image;
 import visnode.application.NodeNetwork;

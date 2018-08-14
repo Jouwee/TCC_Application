@@ -11,7 +11,7 @@ package com.github.jouwee.tcc_projeto;
 public class NumericGene implements Gene<Double> {
 
     /** Value */
-    private final Double value;
+    final Double value;
 
     /**
      * Cria um novo gene numérico

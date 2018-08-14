@@ -10,7 +10,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.paim.commons.Image;
 import visnode.application.NodeNetwork;
 
 /**
@@ -21,44 +20,19 @@ public class IndividualEvaluator {
     
     static ScheduledThreadPoolExecutor delayer = new ScheduledThreadPoolExecutor(16);
     
-    static Image[] inputImage;
-    static Image[] expected;
-    static {
-        try {
-            inputImage = new Image[] {
-                ImageLoader.input("4"),
-                ImageLoader.input("5"),
-                ImageLoader.input("9"),
-                ImageLoader.input("26"),
-                ImageLoader.input("45"),
-                ImageLoader.input("49")
-            };
-            expected = new Image[] {
-                ImageLoader.labeled("4"),
-                ImageLoader.labeled("5"),
-                ImageLoader.labeled("9"),
-                ImageLoader.labeled("26"),
-                ImageLoader.labeled("45"),
-                ImageLoader.labeled("49")
-            };
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-    }    
-    
     public CompletableFuture<IndividualResult> evaluate(Chromossome chromossome) {
         try {
-            CompletableFuture<Void>[] results = new CompletableFuture[inputImage.length];
+            CompletableFuture<Void>[] results = new CompletableFuture[ImageLoader.allInputs().length];
             AtomicDouble sum = new AtomicDouble();
-            for (int i = 0; i < inputImage.length; i++) {
+            for (int i = 0; i < ImageLoader.allInputs().length; i++) {
                 NodeNetwork network = new ChromossomeNetworkConverter().convert(chromossome);
-                results[i] = new NetworkEvaluator(inputImage[i], expected[i]).evaluate(network).thenAccept((res) -> {
+                results[i] = new NetworkEvaluator(ImageLoader.allInputs()[i], ImageLoader.allExpecteds()[i]).evaluate(network).thenAccept((res) -> {
                     sum.addAndGet(res.getCorrectPercentage());
                 });
             }
             CompletableFuture<IndividualResult> averageResult = new CompletableFuture<>();
             CompletableFuture.allOf(results).thenAccept((v) -> {
-                averageResult.complete(new IndividualResult(chromossome, sum.get() / inputImage.length));
+                averageResult.complete(new IndividualResult(chromossome, sum.get() / ImageLoader.allInputs().length));
             });
             return averageResult;
         } catch (Exception e) {

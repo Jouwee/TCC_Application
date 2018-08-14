@@ -31,7 +31,7 @@ export class GenerationDashComponent implements OnInit, OnDestroy {
 
   loadImages() {
     this.individuals.forEach(individual => {
-      this.model.getResultImage('4', individual.chromossome).subscribe((i) => {
+      this.model.getResultImage('1', individual.chromossome).subscribe((i) => {
         individual.image = this._sanitizer.bypassSecurityTrustResourceUrl('data:image/jpg;base64,' + i);
       });
     });

@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLDecoder;
 import java.util.Base64;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
@@ -52,14 +53,16 @@ public class Image extends HttpServlet {
             if (group.equals("processed")) {
                 Chromossome chr = JsonHelper.get().fromJson(chromossome, Chromossome.class);
                 NodeNetwork network = new ChromossomeNetworkConverter().convert(chr);
-                org.paim.commons.Image img = new NetworkExecutor().run(network, ImageLoader.input(id)).get();
+                CompletableFuture<org.paim.commons.Image> future = new NetworkExecutor().run(network, ImageLoader.input(id));
+                future.join();
+                org.paim.commons.Image img = future.get();
                 image = ImageConverter.toBufferedImage(img);
             }
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(image, "png", baos);
             byte[] bytes = baos.toByteArray();
             result = new Message("image", new String(Base64.getEncoder().encode(bytes), "UTF-8"));
-        } catch (Exception e) {
+        } catch (Throwable e) {
             result = new Message("error", e.getMessage());
         }
         return JsonHelper.get().toJson(result);

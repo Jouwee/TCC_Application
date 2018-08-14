@@ -82,8 +82,10 @@ public class GeneticAlgorithmModel {
     }
 
     public void setCurrentGeneration(int currentGeneration) {
-        this.currentGeneration = currentGeneration;
-        sendModelUpdate("currentGeneration", currentGeneration);
+        if (currentGeneration >= 0) {
+            this.currentGeneration = currentGeneration;
+            sendModelUpdate("currentGeneration", currentGeneration);
+        }
     }
 
     public void incrementCurrentGeneration() {

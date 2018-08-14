@@ -24,7 +24,7 @@ import visnode.executor.ProcessNode;
 public class NetworkExecutor {
 
     private final CompositeDisposable compositeSubscription;
-
+    
     public NetworkExecutor() {
         compositeSubscription = new CompositeDisposable();
     }
@@ -48,22 +48,26 @@ public class NetworkExecutor {
         }
         ProcessNode node = (ProcessNode) n;
         node.setInput("image", inputImage);
-        node.process((p) -> {});
-        Observable<Image> obs = node.getOutput("image");
-        compositeSubscription.add(obs.subscribe((x) -> {
-            if (x == null || !(x instanceof Image)) {
-                System.out.println("Invalid output: " + x);
-                future.complete(ImageFactory.buildBinaryImage(1, 1));
-                return;
-            }
-            Image img = (Image) x;
-            if (iterator.hasNext()) {
-                run(iterator, img).thenAccept((img2) -> future.complete(img2));
-            } else {
-                compositeSubscription.clear();
-                future.complete(img);
-            }
-        }));
+        node.process((p) -> {
+            Observable<Image> obs = node.getOutput("image");
+            compositeSubscription.add(obs.subscribe((x) -> {
+                if (x == null || !(x instanceof Image)) {
+                    System.out.println("Invalid output: " + x);
+                    future.complete(ImageFactory.buildBinaryImage(1, 1));
+                    return;
+                }
+                if (x.getWidth() == 1) {
+                    System.out.println("Received invalid image (width <= 1) from " + node.getProcessType());
+                }
+                Image img = (Image) x;
+                if (iterator.hasNext()) {
+                    run(iterator, img).thenAccept((img2) -> future.complete(img2));
+                } else {
+                    compositeSubscription.clear();
+                    future.complete(img);
+                }
+            }));
+        });
         return future;
     }
     

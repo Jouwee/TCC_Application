@@ -25,4 +25,8 @@ export class AppComponent implements OnInit {
         document.getElementById('loadFile').click();
     }
 
+    newSim() {
+        this.model.newSimulation();
+    }
+
 }
