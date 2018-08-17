@@ -159,31 +159,19 @@ public class GeneticAlgorithmController {
             // Keep the best
             newPopulation.add(sorted.get(sorted.size() - 1));
 
-            /*int numberOfRandoms = newPopulation.size() + (int) (parameters.getRandomPercentage() * parameters.getPopulationSize());
+            int numberOfRandoms = newPopulation.size() + (int) (parameters.getRandomPercentage() * parameters.getPopulationSize());
             while (newPopulation.size() < numberOfRandoms) {
                 addLimited(ChromossomeFactory.random(), newPopulation, parameters);
-            }
-
-            int numberOfMutations = newPopulation.size() + (int) (parameters.getMutationPercentage() * parameters.getPopulationSize());
-            while (newPopulation.size() < numberOfMutations) {
-                Chromossome selected = selectFittest(parentPool);
-                addLimited(ChromossomeFactory.mutate(selected, parameters.getMutationChance()), newPopulation, parameters);
             }
 
             int numberOfCrossovers = newPopulation.size() + (int) (parameters.getCrossoverPercentage() * parameters.getPopulationSize());
             while (newPopulation.size() < numberOfCrossovers) {
                 addLimited(ChromossomeFactory.uniformCrossover(selectFittest(parentPool), selectFittest(parentPool)), newPopulation, parameters);
             }
-
             while (newPopulation.size() < parameters.getPopulationSize()) {
                 Chromossome selected = selectFittest(parentPool);
-                addLimited(selected, newPopulation, parameters);
-            }*/
-            
-            for (int i = 0; i < parameters.getPopulationSize(); i++) {
-                newPopulation.add(ChromossomeFactory.random());
+                addLimited(ChromossomeFactory.mutate(selected, parameters.getMutationChance()), newPopulation, parameters);
             }
-            
 
             model.setCurrentPopulation(newPopulation);
         } catch (Exception e) {

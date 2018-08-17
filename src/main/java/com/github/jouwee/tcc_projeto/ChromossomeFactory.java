@@ -52,7 +52,6 @@ public class ChromossomeFactory {
         RobinsonProcess.class,
         PrewittProcess.class,
         CannyProcess.class,
-        SnakeProcess.class,
         ZhangSuenProcess.class,
         StentifordProcess.class,
         HoltProcess.class,
@@ -60,10 +59,11 @@ public class ChromossomeFactory {
         MedianBlurProcess.class,
         GaussianBlurProcess.class,
         FloodFillProcess.class,
+        // SnakeProcess.class,
         null
     };
     /** Maximum number of processes */
-    public static final int MAX_PROCESSES = 6;
+    public static final int MAX_PROCESSES = 10;
     /** Random */
     private static Random random = new Random(System.currentTimeMillis());
     

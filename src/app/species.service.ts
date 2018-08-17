@@ -30,7 +30,8 @@ export class SpeciesService {
       "Holt": "Ho",
       "AverageBlur": "Av",
       "MedianBlur": "Me",
-      "GaussianBlur": "Ga"
+      "GaussianBlur": "Ga",
+      'FloodFill': 'Ff'
     }
     let species = "";
     for (let gene of chromossome) {

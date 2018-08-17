@@ -52,12 +52,15 @@ public class ImageLoader {
     
     public static Image labeled(String name) throws IOException {
         Image image = ImageFactory.buildRGBImage(labeledBuffered(name));
+        Image newImage = ImageFactory.buildEmptyImage(image);
         for (int x = 0; x < image.getWidth(); x++) {
             for (int y = 0; y < image.getHeight(); y++) {
-                image.set(0, x, y, !(image.get(0, x, y) == 255 && image.get(1, x, y) == 0 && image.get(2, x, y) == 0) ? 1 : 0);
+                newImage.set(0, x, y, !(image.get(0, x, y) == 255 && image.get(1, x, y) == 0 && image.get(2, x, y) == 0) ? 255 : 0);
+                newImage.set(1, x, y, !(image.get(0, x, y) == 255 && image.get(1, x, y) == 0 && image.get(2, x, y) == 0) ? 255 : 0);
+                newImage.set(2, x, y, !(image.get(0, x, y) == 255 && image.get(1, x, y) == 0 && image.get(2, x, y) == 0) ? 255 : 0);
             }
         }
-        return image;
+        return newImage;
     }
     
     public static BufferedImage labeledBuffered(String name) throws IOException {
