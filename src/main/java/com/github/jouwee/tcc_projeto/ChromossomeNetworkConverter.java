@@ -6,6 +6,8 @@ import org.paim.pdi.FloodFillProcess;
 import visnode.application.NodeNetwork;
 import visnode.commons.Threshold;
 import visnode.executor.EditNodeDecorator;
+import visnode.executor.Node;
+import visnode.executor.OutputNode;
 import visnode.executor.ProcessNode;
 import visnode.pdi.process.BrightnessProcess;
 import visnode.pdi.process.ContrastProcess;
@@ -65,7 +67,13 @@ public class ChromossomeNetworkConverter {
             last = node;
         }
         if (!binary) {
-            network.add(createNode(ThresholdProcess.class, last));
+            last = createNode(ThresholdProcess.class, last);
+            network.add(last);
+        }
+        if (forUser) {
+            System.out.println("output");
+            last = createNode(new OutputNode(), last);
+            network.add(last);
         }
         return network;
     }
@@ -105,11 +113,19 @@ public class ChromossomeNetworkConverter {
     }
     
     public EditNodeDecorator createNode(Class c, EditNodeDecorator last) {
-        EditNodeDecorator node = new EditNodeDecorator(new ProcessNode(c));
+        return createNode(new ProcessNode(c), last);
+    }
+    
+    public EditNodeDecorator createNode(Node n, EditNodeDecorator last) {
+        EditNodeDecorator node = new EditNodeDecorator(n);
         node.setPosition(new java.awt.Point(x, 0));
         x += 250;
         if (last != null) {
-            node.addConnection("image", last, "image");
+            if (n instanceof OutputNode) {
+                node.addConnection("value", last, "image");
+            } else {
+                node.addConnection("image", last, "image");
+            }
         }
         return node;
     }

@@ -8,6 +8,7 @@ package com.github.jouwee.tcc_projeto;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import javax.imageio.ImageIO;
+import org.paim.commons.BinaryImage;
 import org.paim.commons.Image;
 import org.paim.commons.ImageFactory;
 
@@ -50,20 +51,22 @@ public class ImageLoader {
         return expected;
     }
     
-    public static Image labeled(String name) throws IOException {
+    public static BinaryImage labeled(String name) throws IOException {
         Image image = ImageFactory.buildRGBImage(labeledBuffered(name));
-        Image newImage = ImageFactory.buildEmptyImage(image);
+        BinaryImage newImage = ImageFactory.buildBinaryImage(image.getWidth(), image.getHeight());
         for (int x = 0; x < image.getWidth(); x++) {
             for (int y = 0; y < image.getHeight(); y++) {
-                newImage.set(0, x, y, !(image.get(0, x, y) == 255 && image.get(1, x, y) == 0 && image.get(2, x, y) == 0) ? 255 : 0);
-                newImage.set(1, x, y, !(image.get(0, x, y) == 255 && image.get(1, x, y) == 0 && image.get(2, x, y) == 0) ? 255 : 0);
-                newImage.set(2, x, y, !(image.get(0, x, y) == 255 && image.get(1, x, y) == 0 && image.get(2, x, y) == 0) ? 255 : 0);
+                newImage.set(x, y, image.get(1, x, y) == 255 || image.get(2, x, y) == 255);
             }
         }
         return newImage;
     }
     
     public static BufferedImage labeledBuffered(String name) throws IOException {
+        try {
+            return ImageIO.read(ImageComparer.class.getResource("/Test_Labels/" + name + "_mod.png"));
+        } catch (Exception e) {
+        }
         return ImageIO.read(ImageComparer.class.getResource("/Test_Labels/" + name + ".bmp"));
     }
     
