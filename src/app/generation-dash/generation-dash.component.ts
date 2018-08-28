@@ -7,8 +7,7 @@ import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-generation-dash',
-  templateUrl: './generation-dash.component.html',
-  styleUrls: ['./generation-dash.component.css']
+  templateUrl: './generation-dash.component.html'
 })
 export class GenerationDashComponent implements OnInit, OnDestroy {
 
@@ -17,13 +16,19 @@ export class GenerationDashComponent implements OnInit, OnDestroy {
   private sub: any;
   public individuals: any;
 
-  constructor(private router: Router, private route: ActivatedRoute, public model: ModelService, private species: SpeciesService, private _sanitizer: DomSanitizer) { }
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    public model: ModelService,
+    private species: SpeciesService,
+    private _sanitizer: DomSanitizer
+  ) { }
 
   ngOnInit() {
     this.individuals = [];
     this.sub = this.route.params.subscribe(params => {
       this.number = +params['number'];
-      let gens = this.model["generationResults"];
+      const gens = this.model['generationResults'];
       this.generation = gens[gens.length - this.number];
       this.individuals = JSON.parse(JSON.stringify(this.generation.individuals));
     });
@@ -31,22 +36,26 @@ export class GenerationDashComponent implements OnInit, OnDestroy {
 
   loadImages() {
     this.individuals.forEach(individual => {
-      this.model.getResultImage('1', individual.chromossome).subscribe((i) => {
-        individual.image = this._sanitizer.bypassSecurityTrustResourceUrl('data:image/jpg;base64,' + i);
-      });
+      this.loadImage(individual);
     });
   }
 
-  download(chromossome) {
-    this.model.downloadChromossome(chromossome);
+  loadImage(individual) {
+    this.model.getResultImage('1', individual.chromossome).subscribe((i) => {
+      individual.image = this._sanitizer.bypassSecurityTrustResourceUrl('data:image/jpg;base64,' + i);
+    });
+  }
+
+  download(chromosome) {
+    this.model.downloadChromossome(chromosome);
   }
 
   prevGen() {
-    this.router.navigateByUrl('/gen/'+ (this.number - 1));
+    this.router.navigateByUrl('/gen/' + (this.number - 1));
   }
 
   nextGen() {
-    this.router.navigateByUrl('/gen/'+ (this.number + 1));
+    this.router.navigateByUrl('/gen/' + (this.number + 1));
   }
 
   ngOnDestroy() {

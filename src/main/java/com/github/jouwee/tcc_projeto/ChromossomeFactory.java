@@ -26,6 +26,7 @@ import visnode.pdi.process.FloodFillProcess;
 import visnode.pdi.process.SnakeProcess;
 import visnode.pdi.process.SobelProcess;
 import visnode.pdi.process.StentifordProcess;
+import visnode.pdi.process.ThresholdLimitProcess;
 import visnode.pdi.process.ThresholdProcess;
 import visnode.pdi.process.WeightedGrayscaleProcess;
 import visnode.pdi.process.ZhangSuenProcess;
@@ -40,6 +41,7 @@ public class ChromossomeFactory {
         GrayscaleProcess.class,
         WeightedGrayscaleProcess.class,
         ThresholdProcess.class,
+       // ThresholdLimitProcess.class,
         InvertColorProcess.class,
         OpeningProcess.class,
         ClosingProcess.class,
@@ -59,11 +61,11 @@ public class ChromossomeFactory {
         MedianBlurProcess.class,
         GaussianBlurProcess.class,
         FloodFillProcess.class,
-        // SnakeProcess.class,
+        SnakeProcess.class,
         null
     };
     /** Maximum number of processes */
-    public static final int MAX_PROCESSES = 10;
+    public static final int MAX_PROCESSES = 25;
     /** Random */
     private static Random random = new Random(System.currentTimeMillis());
     
@@ -90,6 +92,33 @@ public class ChromossomeFactory {
         Gene[] genes = new Gene[parent1.getGenes().length];
         for (int i = 0; i < genes.length; i++) {
             if (random.nextDouble() < 0.5) {
+                genes[i] = parent1.getGenes()[i];
+            } else {
+                genes[i] = parent2.getGenes()[i];
+            }
+        }
+        return new Chromossome(genes);
+    }
+    
+    static Chromossome singlePointCrossover(Chromossome parent1, Chromossome parent2) {
+        Gene[] genes = new Gene[parent1.getGenes().length];
+        int cutPosition = random.nextInt(genes.length - 1) + 1;
+        for (int i = 0; i < genes.length; i++) {
+            if (i < cutPosition) {
+                genes[i] = parent1.getGenes()[i];
+            } else {
+                genes[i] = parent2.getGenes()[i];
+            }
+        }
+        return new Chromossome(genes);
+    }
+    
+    static Chromossome doublePointCrossover(Chromossome parent1, Chromossome parent2) {
+        Gene[] genes = new Gene[parent1.getGenes().length];
+        int cutPosition1 = random.nextInt(genes.length - 2) + 1;
+        int cutPosition2 = random.nextInt(genes.length - cutPosition1 - 1) + cutPosition1;
+        for (int i = 0; i < genes.length; i++) {
+            if (i < cutPosition1 || i > cutPosition2) {
                 genes[i] = parent1.getGenes()[i];
             } else {
                 genes[i] = parent2.getGenes()[i];

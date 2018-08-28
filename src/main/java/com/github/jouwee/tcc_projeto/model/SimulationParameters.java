@@ -18,7 +18,7 @@ import java.util.Map;
 public class SimulationParameters {
     
     /** Tamanho da população */
-    private static final int POP_SIZE = 50;
+    private static final int POP_SIZE = 300;
     /** Parâmetros por geração */
     private final Map<Integer, GenerationParameters> parametersPerGeneration;
 
@@ -29,15 +29,15 @@ public class SimulationParameters {
      */
     public static SimulationParameters create() {
         SimulationParameters parameters = new SimulationParameters();
-        parameters.put(1, new GenerationParameters(POP_SIZE, 0, 0.40, 0.005, 1));
-        parameters.put(5, new GenerationParameters(POP_SIZE, 0, 0.40, 0.005, 1));
-        parameters.put(10, new GenerationParameters(POP_SIZE, 0, 0.35, 0.01, 1));
-        parameters.put(20, new GenerationParameters(POP_SIZE, 0, 0.30, 0.02, 1));
-        parameters.put(30, new GenerationParameters(POP_SIZE, 0, 0.25, 0.03, 1));
-        parameters.put(40, new GenerationParameters(POP_SIZE, 0, 0.20, 0.04, 1));
-        parameters.put(50, new GenerationParameters(POP_SIZE, 0, 0.15, 0.05, 1));
-        parameters.put(60, new GenerationParameters(POP_SIZE, 0, 0.10, 0.06, 1));
-        parameters.put(99999, new GenerationParameters(POP_SIZE, 0, 0.05, 0.07, 1));
+        parameters.put(1, new GenerationParameters(POP_SIZE, 0.1, 0.40, 0.005, 1));
+        parameters.put(5, new GenerationParameters(POP_SIZE, 0.1, 0.40, 0.005, 1));
+        parameters.put(10, new GenerationParameters(POP_SIZE, 0.1, 0.35, 0.01, 1));
+        parameters.put(20, new GenerationParameters(POP_SIZE, 0.1, 0.30, 0.02, 1));
+        parameters.put(30, new GenerationParameters(POP_SIZE, 0.1, 0.25, 0.03, 1));
+        parameters.put(40, new GenerationParameters(POP_SIZE, 0.1, 0.20, 0.04, 1));
+        parameters.put(50, new GenerationParameters(POP_SIZE, 0.1, 0.15, 0.05, 1));
+        parameters.put(60, new GenerationParameters(POP_SIZE, 0.1, 0.10, 0.06, 1));
+        parameters.put(99999, new GenerationParameters(POP_SIZE, 0.1, 0.05, 0.07, 1));
         return parameters;
     }
     

@@ -166,7 +166,7 @@ public class GeneticAlgorithmController {
 
             int numberOfCrossovers = newPopulation.size() + (int) (parameters.getCrossoverPercentage() * parameters.getPopulationSize());
             while (newPopulation.size() < numberOfCrossovers) {
-                addLimited(ChromossomeFactory.uniformCrossover(selectFittest(parentPool), selectFittest(parentPool)), newPopulation, parameters);
+                addLimited(ChromossomeFactory.singlePointCrossover(selectFittest(parentPool), selectFittest(parentPool)), newPopulation, parameters);
             }
             while (newPopulation.size() < parameters.getPopulationSize()) {
                 Chromossome selected = selectFittest(parentPool);

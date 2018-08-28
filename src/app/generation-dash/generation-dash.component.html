@@ -21,6 +21,7 @@
         <h1 class="card-title">{{individual.average | percent}}</h1>
         <h6 class="card-subtitle mb-2 text-muted">{{species.getSpecies(individual.chromossome)}}</h6>
         <a class="btn btn-primary" download="Project.vnp" href="{{model.webServiceHost}}chromossome/download?{{individual.chromossome | json}}">Download</a>
+        <a class="btn btn-primary" href="javascript:;" (click)="loadImage(individual)">Carregar</a>
       </div>
       <img class="card-img-bottom" *ngIf="individual.image" [src]="individual.image">
     </div>

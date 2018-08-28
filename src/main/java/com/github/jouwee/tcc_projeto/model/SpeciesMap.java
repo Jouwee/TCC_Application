@@ -29,6 +29,7 @@ import visnode.pdi.process.RobinsonProcess;
 import visnode.pdi.process.SnakeProcess;
 import visnode.pdi.process.SobelProcess;
 import visnode.pdi.process.StentifordProcess;
+import visnode.pdi.process.ThresholdLimitProcess;
 import visnode.pdi.process.ThresholdProcess;
 import visnode.pdi.process.WeightedGrayscaleProcess;
 import visnode.pdi.process.ZhangSuenProcess;
@@ -63,6 +64,7 @@ public class SpeciesMap {
         SPECIES_MAP.put(AverageBlurProcess.class, "Av");
         SPECIES_MAP.put(MedianBlurProcess.class, "Me");
         SPECIES_MAP.put(GaussianBlurProcess.class, "Ga");
+        SPECIES_MAP.put(ThresholdLimitProcess.class, "Tl");
     }
     
     /**

@@ -1,19 +1,28 @@
 package com.github.jouwee.tcc_projeto;
 
 import org.paim.commons.Color;
+import org.paim.commons.Image;
 import org.paim.commons.Point;
 import org.paim.pdi.FloodFillProcess;
 import visnode.application.NodeNetwork;
+import visnode.commons.Input;
 import visnode.commons.Threshold;
 import visnode.executor.EditNodeDecorator;
 import visnode.executor.Node;
 import visnode.executor.OutputNode;
 import visnode.executor.ProcessNode;
+import visnode.pdi.process.AverageBlurProcess;
 import visnode.pdi.process.BrightnessProcess;
+import visnode.pdi.process.ClosingProcess;
 import visnode.pdi.process.ContrastProcess;
+import visnode.pdi.process.DilationProcess;
+import visnode.pdi.process.ErosionProcess;
 import visnode.pdi.process.GaussianBlurProcess;
 import visnode.pdi.process.InputProcess;
+import visnode.pdi.process.MedianBlurProcess;
+import visnode.pdi.process.OpeningProcess;
 import visnode.pdi.process.SnakeProcess;
+import visnode.pdi.process.ThresholdLimitProcess;
 import visnode.pdi.process.ThresholdProcess;
 import visnode.pdi.process.WeightedGrayscaleProcess;
 
@@ -95,7 +104,7 @@ public class ChromossomeNetworkConverter {
         
         if (c == GaussianBlurProcess.class) {
             node.setInput("sigma", params[0].value() * 3);
-            node.setInput("maskSize", (int)(params[1].value() * 4 + 1) * 2 + 1);
+            node.setInput("maskSize", (int)(params[1].value() * 8 + 1) * 2 + 1);
         }
         
         if (c == WeightedGrayscaleProcess.class) {
@@ -108,6 +117,19 @@ public class ChromossomeNetworkConverter {
             node.setInput("seed", Point.CENTER);
             node.setInput("replacement", new Color((int)(params[0].value * 255)));
         }
+        
+        /*
+        if (c == DilationProcess.class || c == ErosionProcess.class || c == OpeningProcess.class || c == ClosingProcess.class || c == MedianBlurProcess.class || c == AverageBlurProcess.class) {
+            node.setInput("maskSize", (int)(params[0].value() * 8 + 1) * 2 + 1);
+        }
+        
+        if (c == ThresholdLimitProcess.class) {
+            node.setInput("lowerThreshold", new Threshold((int)(params[0].value() * 255)));
+            node.setInput("higherThreshold", new Threshold((int)(params[1].value() * 255)));
+            node.setInput("lowerReplaceValue", new Threshold((int)(params[2].value() * 255)));
+            node.setInput("higherReplaceValue", new Threshold((int)(params[3].value() * 255)));
+            node.setInput("centerReplaceValue", new Threshold((int)(params[4].value() * 255)));
+        } */
         
         return node;
     }
