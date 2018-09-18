@@ -13,24 +13,25 @@ export class HomeComponent implements OnInit {
 
     private averagePerGenerationChart;
     private speciesChart;
+    public objectKeys =  Object.keys;
+    public page = 0;
 
     constructor(public model: ModelService, public species: SpeciesService) { }
 
     ngOnInit() {
-        Streamgraph(Highcharts);
+        // Streamgraph(Highcharts);
         this.createAveragePerGenerationChart();
-        this.createSpeciesChart();
-        
+        // this.createSpeciesChart();
         console.log(this.speciesChart);
 
         this.model.addModelListener((key, value) => {
-            if (key == 'generationResults') {
+            if (key === 'generationResults') {
                 value = value.slice().reverse();
                 //
                 let series = this.averagePerGenerationChart.series;
-                let lastPoint = series.length == 0 ? 0 : series[0].data.length;
+                const lastPoint = series.length === 0 ? 0 : series[0].data.length;
                 for (let i = lastPoint; i < value.length; i++) {
-                    let generation = value[i];
+                    const generation = value[i];
                     series[0].addPoint(generation.best.average * 100);
                     series[1].addPoint(generation.average * 100);
                     series[2].addPoint(generation.worst.average * 100);
@@ -67,13 +68,10 @@ export class HomeComponent implements OnInit {
 
             }
         });
-
-        
-
     }
 
     createAveragePerGenerationChart() {
-        let data = [{
+        const data = [{
             name: 'Melhor',
             color: '#218838',
             data: []
@@ -88,8 +86,7 @@ export class HomeComponent implements OnInit {
             data: []
         }];
 
-        
-        for (let generation of (<any>this.model).generationResults.slice().reverse()) {
+        for (const generation of (<any>this.model).generationResults.slice().reverse()) {
             data[0].data.push(generation.best.average * 100);
             data[1].data.push(generation.average * 100);
             data[2].data.push(generation.worst.average * 100);
@@ -99,10 +96,10 @@ export class HomeComponent implements OnInit {
             chart: {
                 type: 'line',
                 animation: Highcharts.svg,
-                height: 300 
+                height: 300
             },
             title: {
-                text: ""
+                text: ''
             },
             xAxis: {
                 labels: {
@@ -146,7 +143,7 @@ export class HomeComponent implements OnInit {
             series: data
         });
     }
-
+/*
     createSpeciesChart() {
         let seriesCount = {};
         let generations = (<any>this.model).generationResults.slice(0, 10).reverse();
@@ -163,9 +160,9 @@ export class HomeComponent implements OnInit {
                 seriesCount[species][i] = seriesCount[species][i] + 1;
             }
         }
-        
+
         let data = Object.keys(seriesCount).map((key) => {
-            let data = seriesCount[key]; 
+            let data = seriesCount[key];
             for (let i = data.length; i < generations.length; i++) {
                 data.push(0);
             }
@@ -180,7 +177,7 @@ export class HomeComponent implements OnInit {
             chart: {
                 type: 'areaspline',
                 animation: Highcharts.svg,
-                height: 150 
+                height: 150
             },
             title: {
                 text: ""
@@ -220,17 +217,33 @@ export class HomeComponent implements OnInit {
             series: data
         });
     }
-
+*/
     runSingle() {
-        this.model.send({ message: "runSingle" });
+        this.model.send({ message: 'runSingle' });
     }
 
     runForever() {
-        this.model.send({ message: "runForever" });
+        this.model.send({ message: 'runForever' });
     }
 
     interrupt() {
-        this.model.send({ message: "interrupt" });
+        this.model.send({ message: 'interrupt' });
+    }
+
+    
+    paging(data) {
+        return data.slice(this.page * 10, this.page * 10 + 10);
+    }
+
+    next() {
+        if (this.page * 10 + 10 < (<any>this.model).generationResults.length) {
+            this.page++;
+        }
+    }
+    prev() {
+        if (this.page > 0) {
+            this.page--;
+        }
     }
 
 }

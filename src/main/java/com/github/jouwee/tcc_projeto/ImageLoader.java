@@ -7,6 +7,8 @@ package com.github.jouwee.tcc_projeto;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.util.function.Supplier;
 import javax.imageio.ImageIO;
 import org.paim.commons.BinaryImage;
 import org.paim.commons.Image;
@@ -18,17 +20,17 @@ import org.paim.commons.ImageFactory;
  */
 public class ImageLoader {
         
-    private static Image[] inputImage;
-    private static Image[] expected;
+    private static Supplier<Image>[] inputImage;
+    private static Supplier<Image>[] expected;
     
     static {
         try {
-            int s = 5; // 50
-            inputImage = new Image[s];
-            expected = new Image[s];
+            int s = 50;
+            inputImage = new Supplier[s];
+            expected = new Supplier[s];
             for (int i = 0; i < s; i++) {
-                inputImage[i] = ImageLoader.input(String.valueOf(i+1));
-                expected[i] = ImageLoader.labeled(String.valueOf(i+1));
+                inputImage[i] = new MemorySafeLazyLoader("input", String.valueOf(i+1));
+                expected[i] = new MemorySafeLazyLoader("labeled", String.valueOf(i+1));
             }
         } catch(Exception e) {
             e.printStackTrace();
@@ -43,11 +45,11 @@ public class ImageLoader {
         return ImageIO.read(ImageComparer.class.getResource("/Test_RGB/" + name + ".bmp"));
     }
     
-    public static Image[] allInputs() {
+    public static Supplier<Image>[] allInputs() {
         return inputImage;
     }
     
-    public static Image[] allExpecteds() {
+    public static Supplier<Image>[] allExpecteds() {
         return expected;
     }
     
@@ -68,6 +70,41 @@ public class ImageLoader {
         } catch (Exception e) {
         }
         return ImageIO.read(ImageComparer.class.getResource("/Test_Labels/" + name + ".bmp"));
+    }
+    
+    private static class MemorySafeLazyLoader implements Supplier<Image> {
+
+        String type;
+        String name;
+        WeakReference<Image> weak;
+        
+        public MemorySafeLazyLoader(String type, String name) {
+            this.type = type;
+            this.name = name;
+            this.weak = new WeakReference<>(null);
+        }
+        
+        @Override
+        public Image get() {
+            try {
+                Image image = weak.get();
+                if (image == null) {
+                    image = load();
+                    weak = new WeakReference<>(image);
+                }
+                return image;
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        
+        public Image load() throws IOException {
+            if (type.equals("input")) {
+                return ImageLoader.input(name);
+            }
+            return ImageLoader.labeled(name);
+        }
+        
     }
     
 }

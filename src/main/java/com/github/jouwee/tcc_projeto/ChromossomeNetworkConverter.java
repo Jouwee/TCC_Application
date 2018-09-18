@@ -118,7 +118,6 @@ public class ChromossomeNetworkConverter {
             node.setInput("replacement", new Color((int)(params[0].value * 255)));
         }
         
-        /*
         if (c == DilationProcess.class || c == ErosionProcess.class || c == OpeningProcess.class || c == ClosingProcess.class || c == MedianBlurProcess.class || c == AverageBlurProcess.class) {
             node.setInput("maskSize", (int)(params[0].value() * 8 + 1) * 2 + 1);
         }
@@ -129,7 +128,7 @@ public class ChromossomeNetworkConverter {
             node.setInput("lowerReplaceValue", new Threshold((int)(params[2].value() * 255)));
             node.setInput("higherReplaceValue", new Threshold((int)(params[3].value() * 255)));
             node.setInput("centerReplaceValue", new Threshold((int)(params[4].value() * 255)));
-        } */
+        }
         
         return node;
     }

@@ -41,7 +41,7 @@ public class ChromossomeFactory {
         GrayscaleProcess.class,
         WeightedGrayscaleProcess.class,
         ThresholdProcess.class,
-       // ThresholdLimitProcess.class,
+        ThresholdLimitProcess.class,
         InvertColorProcess.class,
         OpeningProcess.class,
         ClosingProcess.class,
@@ -65,7 +65,7 @@ public class ChromossomeFactory {
         null
     };
     /** Maximum number of processes */
-    public static final int MAX_PROCESSES = 25;
+    public static final int MAX_PROCESSES = 15;
     /** Random */
     private static Random random = new Random(System.currentTimeMillis());
     

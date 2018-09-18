@@ -2,11 +2,11 @@
     <div class="col-md-3">
         <div class="card">
             <div class="card-body">
-                <h1 class="card-title">{{model.currentGeneration == 0 ? '-' : model.currentGeneration}}</h1>
+                <h1 class="display-2">{{model.currentGeneration == 0 ? '-' : model.currentGeneration}}</h1>
                 <h6 class="card-subtitle mb-2 text-muted">Geração atual</h6>
                 <div class="progress" style="height: 2px;">
-                    <div class="progress-bar" role="progressbar" [style.width.%]="model.currentGenerationProgress * 100" aria-valuenow="25" aria-valuemin="0"
-                        aria-valuemax="100"></div>
+                    <div class="progress-bar" role="progressbar" [style.width.%]="model.currentGenerationProgress * 100"
+                        aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
             </div>
         </div>
@@ -14,17 +14,37 @@
     <div class="col-md-3">
         <div class="card">
             <div class="card-body">
-                <button type="button" class="btn btn-primary btn-block" (click)="runSingle()" [disabled]="model.state != 'idle'">Executar uma</button>
+                <button type="button" class="btn btn-primary btn-block" (click)="runSingle()" [disabled]="model.state != 'idle'">Executar
+                    uma</button>
                 <button type="button" class="btn btn-primary btn-block" (click)="runForever()" [disabled]="model.state != 'idle'">Executar</button>
                 <button type="button" class="btn btn-primary btn-block" (click)="interrupt()">Interromper</button>
             </div>
         </div>
     </div>
-    <div class="col-md-5">
-        <div class="card">
-            <div class="card-body">
-                {{model.simulationParameters | json}}
-            </div>
+    <div class="col-md-6">
+        <div style="max-height: 170px; overflow: auto">
+            <table class="table">
+                <thead class="thead">
+                    <tr>
+                        <th scope="col">Geração</th>
+                        <th scope="col">População</th>
+                        <th scope="col">Crossover</th>
+                        <th scope="col">Mutação</th>
+                        <th scope="col">Limite Espécie</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let parGen of objectKeys(model.simulationParameters.parametersPerGeneration)">
+                        <th scope="row">
+                            <a>{{parGen}}</a>
+                        </th>
+                        <td>{{model.simulationParameters.parametersPerGeneration[parGen].populationSize}}</td>
+                        <td>{{model.simulationParameters.parametersPerGeneration[parGen].crossoverPercentage | percent}}</td>
+                        <td>{{model.simulationParameters.parametersPerGeneration[parGen].mutationChance | percent}}</td>
+                        <td>{{model.simulationParameters.parametersPerGeneration[parGen].maxSpeciesPercentage | percent}}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -70,7 +90,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let generation of model.generationResults">
+                <tr *ngFor="let generation of paging(model.generationResults)">
                     <th scope="row">
                         <a [routerLink]="['/gen', generation.number]">{{generation.number}}</a>
                     </th>
@@ -80,5 +100,6 @@
                 </tr>
             </tbody>
         </table>
+        <button type="button" class="btn btn-primary" (click)="prev()" >&lt;</button> Página {{ page + 1 }} <button type="button" class="btn btn-primary" (click)="next()" >&gt;</button>
     </div>
 </div>

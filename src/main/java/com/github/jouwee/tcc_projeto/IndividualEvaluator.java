@@ -26,7 +26,7 @@ public class IndividualEvaluator {
             AtomicDouble sum = new AtomicDouble();
             for (int i = 0; i < ImageLoader.allInputs().length; i++) {
                 NodeNetwork network = new ChromossomeNetworkConverter().convert(chromossome);
-                results[i] = new NetworkEvaluator(ImageLoader.allInputs()[i], ImageLoader.allExpecteds()[i]).evaluate(network).thenAccept((res) -> {
+                results[i] = new NetworkEvaluator(ImageLoader.allInputs()[i].get(), ImageLoader.allExpecteds()[i].get()).evaluate(network).thenAccept((res) -> {
                     sum.addAndGet(res.getCorrectPercentage());
                 });
             }
